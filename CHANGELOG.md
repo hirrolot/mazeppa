@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
- - Set the _exact_ `checked_oint` version requirement to [`0.6.0`](https://opam.ocaml.org/packages/checked_oint/checked_oint.0.6.0/).
+ - Set the _exact_ `checked_oint` version requirement to [`1.0.0`](https://opam.ocaml.org/packages/checked_oint/checked_oint.1.0.0/).
 
 ## 0.5.2 - 2025-04-08
 
