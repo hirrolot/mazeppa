@@ -379,7 +379,7 @@ In this example, we have just seen a two-level _metasystem stairway_ (in Turchin
 
 The lambda normalizer also shows us how to incarnate higher-order functions into a first-order language. In Mazeppa, we cannot treat functions as values, but it does not mean that we cannot simulate them! **By performing a metasystem transition, we can efficiently implement higher-order functions in a first-order language.** Along with defunctionalization and closure conversion, this technique can be used for compilation of higher-order languages into efficient first-order code.
 
-Related examples: [imperative virtual machine](examples/imperative-vm/), [self-interpreter](examples/self-interpreter/).
+Related examples: [imperative abstract machine](examples/imp/), [self-interpreter](examples/self-interpreter/).
 
 ## Restricting supercompilation
 
