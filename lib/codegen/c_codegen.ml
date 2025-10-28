@@ -194,7 +194,7 @@ end = struct
     | Raw_term.(Let (x, t, u)) ->
       let t_gen, t_fv = gen_term ~ctx t in
       let x', ctx = remember' ~ctx (x, VarEager) in
-      (* See <https://github.com/mazeppa-dev/mazeppa/issues/29>. *)
+      (* See <https://github.com/hirrolot/mazeppa/issues/29>. *)
       let seen = Symbol_set.(if mem x' seen then empty else add x' seen) in
       let u_gen, u_fv = flatten_let_sequence ~ctx ~seen u in
       let scope =

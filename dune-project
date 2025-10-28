@@ -9,15 +9,15 @@
 (generate_opam_files true)
 
 (source
- (github mazeppa-dev/mazeppa))
+ (github hirrolot/mazeppa))
 
-(authors "mazeppa-dev <mazeppa.dev@protonmail.com>")
+(authors "hirrolot <hirrolot@gmail.com>")
 
-(maintainers "mazeppa-dev <mazeppa.dev@protonmail.com>")
+(maintainers "hirrolot <hirrolot@gmail.com>")
 
 (license MIT)
 
-(documentation https://github.com/mazeppa-dev/mazeppa)
+(documentation https://github.com/hirrolot/mazeppa)
 
 (package
  (name mazeppa)

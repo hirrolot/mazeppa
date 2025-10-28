@@ -1,5 +1,5 @@
 # Mazeppa
-[![CI](https://github.com/mazeppa-dev/mazeppa/workflows/OCaml%20CI/badge.svg)](https://github.com/mazeppa-dev/mazeppa/actions)
+[![CI](https://github.com/hirrolot/mazeppa/workflows/OCaml%20CI/badge.svg)](https://github.com/hirrolot/mazeppa/actions)
 
 Supercompilation [^turchin-concept] is a program transformation technique that symbolically evaluates a given program, with run-time values as unknowns. In doing so, it discovers execution patterns of the original program and synthesizes them into standalone functions; the result of supercompilation is a more efficient residual program. In terms of transformational power, supercompilation subsumes both deforestation [^deforestation] and partial evaluation [^partial-evaluation], and even exhibits certain capabilities of theorem proving.
 
@@ -30,7 +30,7 @@ Type `mazeppa --help` to confirm the installation.
 Alternatively, you can clone the repository and install Mazeppa manually:
 
 ```
-$ git clone https://github.com/mazeppa-dev/mazeppa.git
+$ git clone https://github.com/hirrolot/mazeppa.git
 $ cd mazeppa
 $ ./scripts/install.sh
 ```
@@ -809,12 +809,12 @@ Mazeppa employs several interesting design choices (ranked by importance):
      - Note that deriving the value address is a constant-time [perfect hash function], so the cache penalty should be pretty low. Since it is ephemeral, it also does not induce memory leaks.
    - **Local cache:** a [hash table] from addresses of terms _(t1, t2)_ to booleans denoting results of their comparison. This cache makes homeomorphic embedding to have _O(size(t1) * size(t2))_ worst-case time complexity by not recomputing physically equal terms. Unlike the global cache, the local cache only exists during a single comparison.
 
-[eating most]: https://github.com/mazeppa-dev/mazeppa/issues/4#issuecomment-2260440382
+[eating most]: https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2260440382
 [ephemeron]: https://ocaml.org/manual/latest/api/Ephemeron.html
 [perfect hash function]: https://en.wikipedia.org/wiki/Perfect_hash_function#Memory_address_identity
 [hash table]: https://ocaml.org/manual/latest/api/Hashtbl.html
 
- - **Hash consing.** The homeomorphic embedding caches described above depend on how many terms are _shared_. We therefore employ hash consing while unfolding function bodies: if some new term _t_ is structurally equal to some existing term _s_, the latter is reused. To avoid memory leaks, we employ a global [ephemeron] holding weak pointers to terms. Besides improved supercompilation times (due to memoization), hash consing also reduces memory consumption -- see https://github.com/mazeppa-dev/mazeppa/issues/4#issuecomment-2282772940.
+ - **Hash consing.** The homeomorphic embedding caches described above depend on how many terms are _shared_. We therefore employ hash consing while unfolding function bodies: if some new term _t_ is structurally equal to some existing term _s_, the latter is reused. To avoid memory leaks, we employ a global [ephemeron] holding weak pointers to terms. Besides improved supercompilation times (due to memoization), hash consing also reduces memory consumption -- see https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2282772940.
 
  - **Normalization during unfolding.** When a function call is unfolded, we substitute the parameters and normalize the body as much as possible (i.e., without further unfoldings, to guarantee termination). To see why, consider the factorial function `f(n)`; with simple unfolding, we would trap in an unpleasant situation where `f(1u32)` is embedded into `*(1u32, f(-(1u32, 1u32)))`, causing _over-generalization_. In reality, Mazeppa would unfold `f(1u32)` to `*(1u32, f(0u32))`, making the latter a candidate for further unfolding. This approach was suggested in [^supercomp-code-explosion], section 4.5. Its other merits are: 1) less work for future driving steps, 2) less "banal" computation in process graphs, 3) reduced amount of expensive homeomorphic embedding tests.
    - Besides folding constants, we also perform algebraic simplification such as _+(t, 0), +(0, t) -> t_, _-(t, 0) -> t_, _*(t, 0), *(0, t) -> 0_, etc. These can be seen as axioms for built-in types.
@@ -997,7 +997,7 @@ The definition of `eval` is now complete.
  1. Type `git pull && opam publish`.
     1. Specify the correct archive URL and checksums (by running `md5sum` and `sha512sum` on the archive).
 
-[GitHub Releases]: https://github.com/mazeppa-dev/mazeppa/releases
+[GitHub Releases]: https://github.com/hirrolot/mazeppa/releases
 
 <details>
 <summary>On the stability of source code archives</summary>
@@ -1014,7 +1014,7 @@ Including the output of `git archive` is needed because GitHub does not guarante
 
 Not yet, we need to battle-test Mazeppa on some actual programming language. Our long-term goal is to [find suitable heuristics] to profitably supercompile _any_ source file under 10'000 LoC (in Mazeppa).
 
-[find suitable heuristics]: https://github.com/mazeppa-dev/mazeppa/issues/2
+[find suitable heuristics]: https://github.com/hirrolot/mazeppa/issues/2
 
 ### How can I execute programs in Mazeppa?
 

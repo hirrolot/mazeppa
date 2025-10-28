@@ -1,4 +1,4 @@
-// See <https://github.com/mazeppa-dev/mazeppa/issues/13>.
+// See <https://github.com/hirrolot/mazeppa/issues/13>.
 main(xs, op1, op2) := map(op2, map(op1, xs));
 
 map(op, xs) := match xs {

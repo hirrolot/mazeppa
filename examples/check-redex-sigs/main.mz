@@ -1,4 +1,4 @@
-// See <https://github.com/mazeppa-dev/mazeppa/issues/11>.
+// See <https://github.com/hirrolot/mazeppa/issues/11>.
 main() := f(A(Good()));
 
 f(x) := match x {

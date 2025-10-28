@@ -1,4 +1,4 @@
-// See <https://github.com/mazeppa-dev/mazeppa/issues/7>.
+// See <https://github.com/hirrolot/mazeppa/issues/7>.
 main(x) := match =(x, 0i32) {
     T() -> match =(x, 5i32) {
         T() -> Panic("impossible"),

@@ -443,7 +443,7 @@ let supercompile () =
 
 let supercompilation_cases = [ "Tests", supercompile ]
 
-(* See <https://github.com/mazeppa-dev/mazeppa/issues/28>. *)
+(* See <https://github.com/hirrolot/mazeppa/issues/28>. *)
 let freshen_variables () =
     let open Raw_term in
     let make_program y =

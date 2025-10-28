@@ -2,12 +2,12 @@
 opam-version: "2.0"
 version: "0.5.2"
 synopsis: "A modern supercompiler for call-by-value functional languages"
-maintainer: ["mazeppa-dev <mazeppa.dev@protonmail.com>"]
-authors: ["mazeppa-dev <mazeppa.dev@protonmail.com>"]
+maintainer: ["hirrolot <hirrolot@gmail.com>"]
+authors: ["hirrolot <hirrolot@gmail.com>"]
 license: "MIT"
-homepage: "https://github.com/mazeppa-dev/mazeppa"
-doc: "https://github.com/mazeppa-dev/mazeppa"
-bug-reports: "https://github.com/mazeppa-dev/mazeppa/issues"
+homepage: "https://github.com/hirrolot/mazeppa"
+doc: "https://github.com/hirrolot/mazeppa"
+bug-reports: "https://github.com/hirrolot/mazeppa/issues"
 depends: [
   "ocaml" {>= "4.14"}
   "dune" {>= "3.14"}
@@ -38,4 +38,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/mazeppa-dev/mazeppa.git"
+dev-repo: "git+https://github.com/hirrolot/mazeppa.git"
