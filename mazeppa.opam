@@ -4,7 +4,7 @@ version: "0.5.2"
 synopsis: "A modern supercompiler for call-by-value functional languages"
 maintainer: ["hirrolot <hirrolot@gmail.com>"]
 authors: ["hirrolot <hirrolot@gmail.com>"]
-license: "MIT"
+license: "Unlicense"
 homepage: "https://github.com/hirrolot/mazeppa"
 doc: "https://github.com/hirrolot/mazeppa"
 bug-reports: "https://github.com/hirrolot/mazeppa/issues"

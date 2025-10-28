@@ -15,7 +15,7 @@
 
 (maintainers "hirrolot <hirrolot@gmail.com>")
 
-(license MIT)
+(license Unlicense)
 
 (documentation https://github.com/hirrolot/mazeppa)
 
