@@ -3,7 +3,7 @@
 (* The simplified syntax of C99 from [1] with some GNU extensions.
  *
  * [1] <https://www.open-std.org/JTC1/SC22/WG14/www/docs/n1256.pdf>
-*)
+ *)
 
 open Document
 
@@ -239,7 +239,7 @@ let c_return_statement expression = combine [ atom "return"; space; expression; 
 (* GNU C statement expressions [1].
  *
  * [1] <https://gcc.gnu.org/onlinedocs/gcc/Statement-Exprs.html>
-*)
+ *)
 let c_statement_expression block_item_list =
     parens [ c_compound_statement block_item_list ]
 ;;
