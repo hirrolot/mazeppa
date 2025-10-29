@@ -89,6 +89,16 @@ end = struct
           "%s accepts no arguments: %s"
           (Symbol.verbatim op)
           (Raw_term.verbatim scrutinee)
+      | None when Symbol.is_op1 op && arity <> 1 ->
+        Util.panic
+          "%s accepts only one argument: %s"
+          (Symbol.verbatim op)
+          (Raw_term.verbatim scrutinee)
+      | None when Symbol.is_op2 op && arity <> 2 ->
+        Util.panic
+          "%s accepts exactly two arguments: %s"
+          (Symbol.verbatim op)
+          (Raw_term.verbatim scrutinee)
       | None when not (Symbol.is_primitive_op op) ->
         Hashtbl.replace table op (scrutinee, arity)
       | _ -> ()

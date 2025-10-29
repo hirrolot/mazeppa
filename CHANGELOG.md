@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - Set the _exact_ `checked_oint` version requirement to [`1.0.0`](https://opam.ocaml.org/packages/checked_oint/checked_oint.1.0.0/).
 
+### Fixed
+
+ - Emit errors for primitive operations with an incorrect number of arguments.
+
 ## 0.5.2 - 2025-04-08
 
 ### Changed

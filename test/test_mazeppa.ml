@@ -384,7 +384,82 @@ let raw_program_errors () =
         , symbol "f"
         , []
         , R.(Match (call ("A", []), [ (symbol "A", [ symbol "x" ]), var "x" ])) )
-      ]
+      ];
+    (* Test unary primitive operators with wrong arity. *)
+    check
+      ~expected:"`~` accepts only one argument: `~()`"
+      [ ([], symbol "f", [], R.(call ("~", []))) ];
+    check
+      ~expected:"`~` accepts only one argument: `~(x, y)`"
+      [ ([], symbol "f", [ symbol "x"; symbol "y" ], R.(call ("~", [ var "x"; var "y" ])))
+      ];
+    check
+      ~expected:"`#` accepts only one argument: `#()`"
+      [ ([], symbol "f", [], R.(call ("#", []))) ];
+    check
+      ~expected:"`length` accepts only one argument: `length(x, y, z)`"
+      [ ( []
+        , symbol "f"
+        , [ symbol "x"; symbol "y"; symbol "z" ]
+        , R.(call ("length", [ var "x"; var "y"; var "z" ])) )
+      ];
+    check
+      ~expected:"`string` accepts only one argument: `string()`"
+      [ ([], symbol "f", [], R.(call ("string", []))) ];
+    check
+      ~expected:"`u8` accepts only one argument: `u8(x, y)`"
+      [ ([], symbol "f", [ symbol "x"; symbol "y" ], R.(call ("u8", [ var "x"; var "y" ])))
+      ];
+    check
+      ~expected:"`i32` accepts only one argument: `i32(x, y, z, w)`"
+      [ ( []
+        , symbol "f"
+        , [ symbol "x"; symbol "y"; symbol "z"; symbol "w" ]
+        , R.(call ("i32", [ var "x"; var "y"; var "z"; var "w" ])) )
+      ];
+    (* Test binary primitive operators with wrong arity. *)
+    check
+      ~expected:"`+` accepts exactly two arguments: `+()`"
+      [ ([], symbol "f", [], R.(call ("+", []))) ];
+    check
+      ~expected:"`+` accepts exactly two arguments: `+(x)`"
+      [ ([], symbol "f", [ symbol "x" ], R.(call ("+", [ var "x" ]))) ];
+    check
+      ~expected:"`+` accepts exactly two arguments: `+(x, y, z)`"
+      [ ( []
+        , symbol "f"
+        , [ symbol "x"; symbol "y"; symbol "z" ]
+        , R.(call ("+", [ var "x"; var "y"; var "z" ])) )
+      ];
+    check
+      ~expected:"`-` accepts exactly two arguments: `-(x)`"
+      [ ([], symbol "f", [ symbol "x" ], R.(call ("-", [ var "x" ]))) ];
+    check
+      ~expected:"`*` accepts exactly two arguments: `*()`"
+      [ ([], symbol "f", [], R.(call ("*", []))) ];
+    check
+      ~expected:"`/` accepts exactly two arguments: `/(x, y, z)`"
+      [ ( []
+        , symbol "f"
+        , [ symbol "x"; symbol "y"; symbol "z" ]
+        , R.(call ("/", [ var "x"; var "y"; var "z" ])) )
+      ];
+    check
+      ~expected:"`=` accepts exactly two arguments: `=(x)`"
+      [ ([], symbol "f", [ symbol "x" ], R.(call ("=", [ var "x" ]))) ];
+    check
+      ~expected:"`!=` accepts exactly two arguments: `!=()`"
+      [ ([], symbol "f", [], R.(call ("!=", []))) ];
+    check
+      ~expected:"`<` accepts exactly two arguments: `<(x, y, z, w)`"
+      [ ( []
+        , symbol "f"
+        , [ symbol "x"; symbol "y"; symbol "z"; symbol "w" ]
+        , R.(call ("<", [ var "x"; var "y"; var "z"; var "w" ])) )
+      ];
+    check
+      ~expected:"`get` accepts exactly two arguments: `get(x)`"
+      [ ([], symbol "f", [ symbol "x" ], R.(call ("get", [ var "x" ]))) ]
 ;;
 
 let raw_program_errors_cases = [ "Tests", raw_program_errors ]
