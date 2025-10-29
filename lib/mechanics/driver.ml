@@ -132,6 +132,8 @@ let argument_status =
        to avoid potential duplication of computation, because (as usual) arguments are
        duplicated when they are substituted. *)
     | t when Term.is_neutral t -> `Extract
+    (* We extract foreign function calls for the same reason. *)
+    | Call (op, _args) when Symbol.is_foreign_function op -> `Extract
     (* Only regular constructor calls can be passed as arguments. *)
     | Call (op, _args) ->
       (match Symbol.op_kind op with
@@ -246,6 +248,7 @@ struct
     | `FCall, [ t1; t2 ] when Symbol.is_op2 op ->
       step_of_term (Simplifier.handle_op2 ~op (t1, t2))
     | `FCall, args when Symbol.is_primitive_op op -> invalid_arg_list ~op args
+    | `FCall, args when Symbol.is_foreign_function op -> Decompose (op, args)
     | `FCall, args ->
       let params, body = Program.find_f_rule ~program op in
       Unfold (simplify_body ~params ~args body)

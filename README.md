@@ -766,6 +766,10 @@ $ gcc main.c program.o sds.c -lgc -std=gnu11
 
 `./a.out` prints `fib(10) = 55` and exits, as expected.
 
+### FFI
+
+See [`test-c-codegen/ffi/`](test-c-codegen/ffi/).
+
 ## Usage considerations
 
  - Follow the instructions from the [installation section](#installation) to build Mazeppa with an Flambda-enabled OCaml compiler.

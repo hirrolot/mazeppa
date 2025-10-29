@@ -30,7 +30,7 @@ let compute_productive_g_rules program =
       | Term.Call (op, _args) -> go_call ~op (Symbol.op_kind op)
     and go_call ~op = function
       | `CCall -> op <> Symbol.of_string "Panic"
-      | `FCall when Symbol.is_primitive_op op -> false
+      | `FCall when Symbol.is_primitive_op op || Symbol.is_foreign_function op -> false
       | `FCall ->
         let$ () = op in
         let _params, body = Program.find_f_rule ~program op in

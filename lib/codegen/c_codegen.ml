@@ -102,6 +102,10 @@ end = struct
 
   let constructor_symbols = ref Symbol_set.empty
 
+  type ffi_function_data = { arity : int }
+
+  let ffi_functions = ref Symbol_map.empty
+
   let remember_constructor c =
       if Symbol.(c <> of_string "T" && c <> of_string "F")
       then constructor_symbols := Symbol_set.add c !constructor_symbols
@@ -301,6 +305,33 @@ end = struct
   and gen_call ~ctx (f, args) =
       match args with
       | [] -> c_function_call (gen_op f, []), Symbol_set.empty
+      | args when Symbol.is_foreign_function f ->
+        ffi_functions := Symbol_map.add f { arity = List.length args } !ffi_functions;
+        let args_gen, args_fv = Symbol_set.decouple_map ~f:(gen_term ~ctx) args in
+        ( [ c_initialization_declaration
+              ( [ c_struct_specifier (id "mz_value", None) ]
+              , c_array_declarator (id "args", List.length args)
+              , None )
+          ]
+          @ (args_gen
+             |> List.mapi (fun i t_gen ->
+               c_expression_statement
+                 (c_assignment_expression
+                    ( c_array_subscript
+                        ( c_identifier_expression (id "args")
+                        , c_integer_constant_expression (index i) )
+                    , t_gen ))))
+          @ [ c_expression_statement
+                (c_function_call
+                   ( id (Symbol.to_string f)
+                   , args_gen
+                     |> List.mapi (fun i _t_gen ->
+                       c_array_subscript
+                         ( c_identifier_expression (id "args")
+                         , c_integer_constant_expression (index i) )) ))
+            ]
+          |> c_statement_expression
+        , args_fv )
       | args ->
         let args_gen, args_fv = Symbol_set.decouple_map ~f:(gen_term ~ctx) args in
         ( [ c_initialization_declaration
@@ -462,9 +493,23 @@ end = struct
           |> List.map (fun c -> c_identifier_expression (gen_op c)) )
   ;;
 
+  let ffi_extern_declarations =
+      Symbol_map.bindings !ffi_functions
+      |> List.map (fun (f, { arity }) ->
+        c_function_prototype
+          ( [ c_extern; c_typedef_name (id "mz_Value") ]
+          , id (Symbol.to_string f)
+          , List.init arity (fun _i ->
+              c_parameter_declaration
+                ( [ c_typedef_name (id "mz_Value") ]
+                , (* Foreign functions' parameters are always unnamed.*)
+                  None )) ))
+  ;;
+
   let external_declarations : c_external_declaration list =
       [ c_include (`Quotes "mazeppa.h") ]
       @ [ user_enumeration_definition ]
+      @ ffi_extern_declarations
       @ function_prototypes
       @ !thunks []
       @ function_definitions

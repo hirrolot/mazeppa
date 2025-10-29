@@ -56,6 +56,8 @@ let is_op2 = function
 
 let is_primitive_op op = is_op1 op || is_op2 op
 
+let is_foreign_function op = String.(length op >= 7 && sub op 0 7 = "mz_ffi_")
+
 let op_kind op : [ `CCall | `FCall | `GCall ] =
     if op.[0] >= 'A' && op.[0] <= 'Z'
     then `CCall

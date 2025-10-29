@@ -22,6 +22,8 @@ val is_op2 : t -> bool
 
 val is_primitive_op : t -> bool
 
+val is_foreign_function : t -> bool
+
 val comma_sep : t list -> string
 
 val comma_sep_verbatim : t list -> string

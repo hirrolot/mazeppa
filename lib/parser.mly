@@ -14,7 +14,7 @@
 %token LPAREN RPAREN LBRACE RBRACE
 
 // Keywords.
-%token MATCH LET EXTRACT
+%token MATCH LET EXTRACT CALL
 
 // Miscellaneous.
 %token <Checked_oint.generic> INT
@@ -54,6 +54,13 @@ term:
 
     | op = SYMBOL; LPAREN; args = separated_list(COMMA, term); RPAREN {
         Raw_term.Call (op, args)
+    }
+
+    | CALL; op = STRING; LPAREN; args = separated_list(COMMA, term); RPAREN {
+        let ffi_pattern = Str.regexp "^mz_ffi_[a-zA-Z_][a-zA-Z0-9_]*$" in
+        if not (Str.string_match ffi_pattern op 0) then
+            Util.panic "FFI functions must be named `mz_ffi_xxx`: `%s`" op;
+        Raw_term.Call (Symbol.of_string op, args)
     }
 
     | MATCH; t = term;

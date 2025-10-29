@@ -1,6 +1,6 @@
 [
   [
-    [ "call", [ "op", "x" ], ".g1(op, x)" ],
+    [ "invoke", [ "op", "x" ], ".g1(op, x)" ],
     [ "main", [ "xs", "op1", "op2" ], "map(op2, map(op1, xs))" ],
     [ "map", [ "op", "xs" ], ".g0(xs, op)" ]
   ],
@@ -8,7 +8,9 @@
     [
       ".g0",
       [
-        [ "Cons", [ "x", "xs" ], [ "op" ], "Cons(call(op, x), map(op, xs))" ],
+        [
+          "Cons", [ "x", "xs" ], [ "op" ], "Cons(invoke(op, x), map(op, xs))"
+        ],
         [ "Nil", [], [ "op" ], "Nil()" ]
       ]
     ],

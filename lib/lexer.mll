@@ -56,6 +56,7 @@ rule read =
     (* Keywords. *)
     | "match" { MATCH }
     | "let" { LET }
+    | "call" { CALL }
     | "@extract" { EXTRACT }
 
     (* Integers. *)

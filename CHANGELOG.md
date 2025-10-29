@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
+### Added
+
+ - C FFI support [**BC**].
+   - We introduced the `call` keyword, for which reason this change is not backwards-compatible.
+
 ### Changed
 
  - Set the _exact_ `checked_oint` version requirement to [`1.0.0`](https://opam.ocaml.org/packages/checked_oint/checked_oint.1.0.0/).

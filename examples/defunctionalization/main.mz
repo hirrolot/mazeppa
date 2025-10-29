@@ -3,10 +3,10 @@ main(xs, op1, op2) := map(op2, map(op1, xs));
 
 map(op, xs) := match xs {
     Nil() -> Nil(),
-    Cons(x, xs) -> Cons(call(op, x), map(op, xs))
+    Cons(x, xs) -> Cons(invoke(op, x), map(op, xs))
 };
 
-call(op, x) := match op {
+invoke(op, x) := match op {
     F() -> +(x, 5i32),
     G() -> /(x, 10i32),
     H() -> *(x, x)
