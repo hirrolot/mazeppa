@@ -1,1 +1,4 @@
-main() := +(call "mz_ffi_foo" (5i32), call "mz_ffi_bar" (7i32));
+main() :=
+    +(call "mz_ffi_foo" (),
+        +(call "mz_ffi_bar" (5i32),
+            call "mz_ffi_baz" (6i32, 7i32)));

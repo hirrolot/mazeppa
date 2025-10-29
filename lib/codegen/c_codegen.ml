@@ -303,10 +303,13 @@ end = struct
       @ [ c_return_statement t_gen ]
 
   and gen_call ~ctx (f, args) =
+      if Symbol.is_foreign_function f
+      then ffi_functions := Symbol_map.add f { arity = List.length args } !ffi_functions;
       match args with
+      | [] when Symbol.is_foreign_function f ->
+        c_function_call (id (Symbol.to_string f), []), Symbol_set.empty
       | [] -> c_function_call (gen_op f, []), Symbol_set.empty
       | args when Symbol.is_foreign_function f ->
-        ffi_functions := Symbol_map.add f { arity = List.length args } !ffi_functions;
         let args_gen, args_fv = Symbol_set.decouple_map ~f:(gen_term ~ctx) args in
         ( [ c_initialization_declaration
               ( [ c_struct_specifier (id "mz_value", None) ]
