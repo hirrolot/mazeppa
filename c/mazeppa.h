@@ -40,7 +40,7 @@
 #define MZ_CALL_MAIN(...) op_main(MZ_PRIV_PTR_TO(mz_Value, __VA_ARGS__))
 
 // Debugging functionality
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 // By default, we use `mz_Value`. However, if we need a mutable variable, we
 // use `struct mz_value` instead.
@@ -72,7 +72,7 @@ inline static void mz_stuck(const uint64_t tag, mz_TagMismatch info) {
 }
 
 // Miscellaneous macros
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 #define MZ_PRIV_BOX(T, ...) MZ_PRIV_BOX_MANY(T, 1, __VA_ARGS__)
 #define MZ_PRIV_BOX_MANY(T, n, ...)                                            \
@@ -102,7 +102,7 @@ inline static void mz_stuck(const uint64_t tag, mz_TagMismatch info) {
 #define MZ_PRIV_SND_AUX(_x, y, ...) y
 
 // Fixed-width integers
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 typedef uint8_t mz_prim_U8;
 typedef uint16_t mz_prim_U16;
@@ -145,7 +145,7 @@ typedef __int128 mz_prim_I128;
 #define MZ_MAX_INT_PRINT_SIZE (40 + /* the null character */ 1)
 
 // Macro routines for fixed-width integers
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 #define MZ_ENUM_INT_TYPES(X, x)                                                \
     X(U, 8, x)                                                                 \
@@ -219,7 +219,7 @@ typedef __int128 mz_prim_I128;
     ~, const mz_prim_##signedness##128 *
 
 // Garbage collection utilities
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 #define X(name, gc)                                                            \
     inline static void *name(const size_t nbytes) {                            \
@@ -240,9 +240,8 @@ X(mz_malloc_atomic, GC_MALLOC_ATOMIC)
 #undef X
 
 #define X(signedness, bitness)                                                 \
-    inline static const mz_prim_##signedness##bitness                          \
-        *mz_priv_box_##signedness##bitness(                                    \
-            const mz_prim_##signedness##bitness x) {                           \
+    inline static const mz_prim_##signedness##bitness *                        \
+    mz_priv_box_##signedness##bitness(const mz_prim_##signedness##bitness x) { \
         mz_prim_##signedness##bitness *const y = mz_malloc_atomic(sizeof(*y)); \
         *y = x;                                                                \
         return y;                                                              \
@@ -254,7 +253,7 @@ X(I, 128)
 #undef X
 
 // 128-bit integers utilities
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 inline static char *
 mz_priv_sprint_u128(const unsigned __int128 n, char *restrict buffer) {
@@ -286,7 +285,7 @@ mz_priv_sprint_i128(const __int128 n, char *restrict buffer) {
 }
 
 // Language values
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 typedef mz_Value *const mz_EnvPtr, *const mz_ArgsPtr;
 
@@ -380,7 +379,7 @@ inline static mz_Value mz_force(mz_Value v) {
 }
 
 // Value constructors
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 #define MZ_VALUE(variant, ...)                                                 \
     ((mz_Value){mz_##variant##Tag, .variant = __VA_ARGS__})
@@ -420,8 +419,8 @@ X(I)
 #undef X
 
 #define MZ_DATA(tag, nvalues, ...)                                             \
-    ((mz_Value){                                                               \
-        tag, .payload = MZ_PRIV_BOX_MANY(mz_Value, nvalues, __VA_ARGS__)})
+    ((mz_Value){tag,                                                           \
+                .payload = MZ_PRIV_BOX_MANY(mz_Value, nvalues, __VA_ARGS__)})
 #define MZ_EMPTY_DATA(tag) ((mz_Value){tag, .payload = NULL})
 #define MZ_BOOL(b)         ((b) ? MZ_EMPTY_DATA(op_T) : MZ_EMPTY_DATA(op_F))
 
@@ -444,7 +443,7 @@ inline static mz_Value mz_priv_env_var_lazy(mz_EnvPtr env) {
 }
 
 // Unary operators
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 inline static mz_Value mz_string_of(mz_Value v);
 
@@ -577,7 +576,7 @@ inline static mz_Value mz_length_of(mz_Value v) {
 }
 
 // Binary operators
-// =============================================================================
+// /////////////////////////////////////////////////////////////////////////////
 
 // The order of evaluation of arguments is unspecified by C; this macro
 // preserves the left-to-right order of Mazeppa.
