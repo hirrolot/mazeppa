@@ -658,7 +658,7 @@ static mz_Value op_magic(mz_ArgsPtr args) {
     mz_Value var_n = (args)[1];
     return ({
     struct mz_value tmp = MZ_OP2(var_m, equal, MZ_INT(U, 32, UINT32_C(0)));
-    switch((tmp).tag) {
+    switch ((tmp).tag) {
     case op_T: {
     tmp = MZ_EMPTY_DATA(op_Nil);
     break;
@@ -678,7 +678,7 @@ static mz_Value op_getIt(mz_ArgsPtr args) {
     mz_Value var_n = (args)[1];
     return ({
     struct mz_value tmp = var_xs;
-    switch((tmp).tag) {
+    switch ((tmp).tag) {
     case op_Nil: {
     tmp = mz_panic(MZ_STRING("undefined"));
     break;
@@ -688,7 +688,7 @@ static mz_Value op_getIt(mz_ArgsPtr args) {
     mz_Value var_xs$ = ((tmp).payload)[1];
     tmp = ({
     struct mz_value tmp = MZ_OP2(var_n, equal, MZ_INT(U, 64, UINT64_C(1)));
-    switch((tmp).tag) {
+    switch ((tmp).tag) {
     case op_T: {
     tmp = mz_force(var_x);
     break;
