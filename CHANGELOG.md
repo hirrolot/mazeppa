@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
+## 0.6.2 - 2025-11-22
+
 ### Fixed
 
  - Use proper spacing for `switch`-statements in C output: `switch (x)` not `switch(x)`.
