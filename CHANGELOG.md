@@ -6,8 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
-## 0.6.1 - 2025-11-21
-
 ### Fixed
 
  - Treat FFI calls as neutrals (issue https://github.com/hirrolot/mazeppa/issues/31).
