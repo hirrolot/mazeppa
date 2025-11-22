@@ -53,7 +53,7 @@ and is_neutral_call ~op = function
   | [ t ] when Symbol.is_op1 op -> is_neutral t
   | [ t1; t2 ] when Symbol.is_op2 op ->
     (is_neutral t1 && is_value t2) || (is_value t1 && is_neutral t2)
-  | _args -> false
+  | _args -> Symbol.is_foreign_function op
 
 and is_value = function
   | Var _ | Const _ -> true

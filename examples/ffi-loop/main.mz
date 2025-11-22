@@ -1,0 +1,5 @@
+// See <https://github.com/hirrolot/mazeppa/issues/31>.
+main(i) := match >(i, call "mz_ffi_limit" ()) {
+    T() -> Done(),
+    F() -> main(+(i, 1i32))
+};
