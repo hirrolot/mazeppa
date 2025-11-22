@@ -1053,7 +1053,11 @@ Mazeppa itself is inspired by this excellent paper (in English):
  - _"A Roadmap to Metacomputation by Supercompilation"_ [^metacomp-by-supercomp]
 
 Finally, the international META workshops are great collections of articles about supercompilation and adjacent fields:
- - [META 2008](http://meta2008.pereslavl.ru/), [META 2010](http://meta2010.pereslavl.ru/), [META 2012](http://meta2012.pereslavl.ru/), [META 2014](http://meta2014.pereslavl.ru/), [META 2016](http://meta2016.pereslavl.ru/)
+ - [META 2008](http://meta2008.pereslavl.ru/)
+ - [META 2010](http://meta2010.pereslavl.ru/)
+ - [META 2012](http://meta2012.pereslavl.ru/)
+ - [META 2014](http://meta2014.pereslavl.ru/)
+ - [META 2016](http://meta2016.pereslavl.ru/)
 
 ### Can supercompilation be even more powerful?
 
