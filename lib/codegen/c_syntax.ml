@@ -227,7 +227,7 @@ let c_expression_statement expression = combine [ expression; atom ";" ]
 
 (* 6.8.4.2 The switch statement *)
 let c_switch_statement (expression, statement) =
-    [ atom "switch"; parens [ expression ]; space; statement ] |> combine
+    [ atom "switch"; space; parens [ expression ]; space; statement ] |> combine
 ;;
 
 (* 6.8.6.3 The break statement *)
