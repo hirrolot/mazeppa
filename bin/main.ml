@@ -117,7 +117,6 @@ let supercompile ~(channels : channels) (input : Raw_program.t) : unit =
 type run_config =
   { target_dir : string
   ; inspect : bool
-  ; print_gc_stats : bool
   }
 
 let prepare_target_dir (conf : run_config) : unit =
@@ -160,8 +159,7 @@ let supercompile (conf : run_config) : unit =
     else
       supercompile
         ~channels:{ program_oc = None; graph_oc = None; nodes_oc = None; output_oc }
-        input;
-    if conf.print_gc_stats then Gc.print_stat stderr
+        input
 ;;
 
 type translate_config =
@@ -194,16 +192,6 @@ let translate (conf : translate_config) : unit =
 ;;
 
 module Options = struct
-  let get_print_gc_stats () =
-      Clap.flag
-        ~set_long:"print-gc-stats"
-        ~description:
-          "Print the GC statistics before exiting. See \
-           <https://ocaml.org/manual/latest/api/Gc.html#TYPEstat> for the meaning of the \
-           fields."
-        false
-  ;;
-
   let get_target_dir () =
       Clap.default_string
         ~long:"target-dir"
@@ -255,8 +243,7 @@ let get_command () =
        @@ fun () ->
        let target_dir = get_target_dir () in
        let inspect = get_inspect () in
-       let print_gc_stats = get_print_gc_stats () in
-       fun () -> supercompile { target_dir; inspect; print_gc_stats })
+       fun () -> supercompile { target_dir; inspect })
     ; (Clap.case "translate" ~description:"Translate a program to some target language."
        @@ fun () ->
        let language = get_language () in
@@ -273,12 +260,10 @@ let get_command () =
            "Evaluate a program and print the result. The main function must not accept \
             parameters."
        @@ fun () ->
-       let print_gc_stats = get_print_gc_stats () in
        fun () ->
-         let input = read_file "main.mz" in
-         Mazeppa.check input;
-         print_endline (Raw_term.to_string (Mazeppa.eval input));
-         if print_gc_stats then Gc.print_stat stderr)
+       let input = read_file "main.mz" in
+       Mazeppa.check input;
+       print_endline (Raw_term.to_string (Mazeppa.eval input)))
     ]
     |> Clap.subcommand
 ;;

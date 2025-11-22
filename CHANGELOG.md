@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
+### Removed
+
+ - The `--print-gc-stats` flag for the `run` and `eval` commands (no longer needed).
+
 ## 0.6.2 - 2025-11-22
 
 ### Fixed
