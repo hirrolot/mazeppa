@@ -55,21 +55,22 @@ val mazeppa_h : out_channel -> unit
 
 (**/**)
 
+(* The modules must be sorted in the alphabetic order. *)
 module Internals : sig
-  module Parser = Parser
-  module Lexer = Lexer
-  module Util = Util
-  module Symbol_map = Symbol_map
-  module Subst = Subst
-  module Term = Term
-  module Program = Program
-  module Homeomorphic_emb = Homeomorphic_emb
-  module Msg = Msg
   module Converter = Converter
-  module Supervisor = Supervisor
-  module Visualizer = Visualizer
-  module Residualizer = Residualizer
+  module Homeomorphic_emb = Homeomorphic_emb
+  module Lexer = Lexer
+  module Msg = Msg
+  module Parser = Parser
   module Pretty = Pretty
+  module Program = Program
+  module Residualizer = Residualizer
+  module Subst = Subst
+  module Supervisor = Supervisor
+  module Symbol_map = Symbol_map
+  module Term = Term
+  module Util = Util
+  module Visualizer = Visualizer
 end
 
 (**/**)
