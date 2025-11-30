@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+ - Check integers according to their bit lengths for more predictable supercompilation (issue https://github.com/hirrolot/mazeppa/issues/32).
  - Only require `bisect_ppx` and `alcotest` for testing, not for production builds.
- - Check integers according to their bit lengths (issue https://github.com/hirrolot/mazeppa/issues/32).
 
 ## 0.7.0 - 2025-11-22
 
@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
  - Preserve the order of built-in panics in residual programs (issue https://github.com/hirrolot/mazeppa/issues/23).
-   - Algebraic simplification now requires operands to be either variables or constants, not compound values.
+   - Algebraic simplification now requires operands to be either variables or constants, not compounds.
  - Eliminate let-bindings for "innocent terms" via postprocessing.
    - Innocent terms are variables, integer constants, and zero-arity constructor calls.
  - Set the minimum supported OCaml version to 4.14.0.
@@ -158,7 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Optimize homeomorphic embedding by maintaining a local result cache (issue https://github.com/hirrolot/mazeppa/issues/20).
  - Other homeomorphic embedding performance tweaks (issue https://github.com/hirrolot/mazeppa/issues/17).
    - In particular, utilize `Weak` hash consing while building function bodies.
- - Rename the functions 1) `Symbol.kind` to `op_kind`, 2) `Symbol.is_lazy` to `is_lazy_op` for clarity [**BC**].
+ - Rename the functions 1) `Symbol.kind` to `op_kind`, 2) `Symbol.is_lazy` to `is_lazy_op` [**BC**].
  - Hide the middles of long reduction paths with `(N more...)` (issue https://github.com/hirrolot/mazeppa/issues/21).
 
 ### Fixed
@@ -204,7 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
- - Simplify horizontal configuration analysis by only checking for renamings instead of matching arbitrary safe instances.
+ - Only check for renamings instead of arbitrary safe instances when analyzing configurations horizontally.
  - Do not emit 1) linear let-bindings for redexes, 2) unused let-bindings for immediate terms.
 
 ## 0.1.1 - 2024-07-15
@@ -216,7 +216,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
- - The following simplification rules have been upgraded to handle arbitrary values instead of variables:
+ - The following simplification rules are upgraded to handle any values instead of variables only:
    - _*(x, 0), *(0, x) -> 0_
    - _&(x, 0), &(0, x) -> 0_
    - _%(x, 1) -> 0_
