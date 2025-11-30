@@ -141,13 +141,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
- - Expose the `Gensym` module in the public API (previously private).
+ - Expose the `Gensym` module in the public API, which was previously private to users.
 
 ## 0.3.1 - 2024-09-23
 
 ### Added
 
- - The Mazeppa-to-C translator (with GNU11 extensions) via the new `translate` CLI command (issue https://github.com/hirrolot/mazeppa/issues/1).
+ - The Mazeppa-to-C translator via the new `translate` command (issue https://github.com/hirrolot/mazeppa/issues/1).
  - The `translate_to_c` and `mazeppa_h` API functions.
 
 ## 0.3.0 - 2024-08-16
