@@ -10,7 +10,11 @@ let rec print = function
   | Raw_term.Call (op, args) ->
     (* Since residual code may contain some deeply nested function calls, [~nest:4] would
        not be a good idea. *)
-    [ print_symbol op; parens [ comma_sep (List.map print args) ] ] |> combine
+    (if Symbol.is_foreign_function op
+     then [ atom "call"; space; atom "\""; print_symbol op; atom "\""; space ]
+     else [ print_symbol op ])
+    @ [ parens [ comma_sep (List.map print args) ] ]
+    |> combine
   | Raw_term.Match (t, [ (pattern, u) ]) -> print_let (print_pattern pattern, t, u)
   | Raw_term.Match (t, cases) ->
     let cases_doc =

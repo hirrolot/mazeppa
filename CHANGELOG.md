@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Check integers according to their bit lengths for more predictable supercompilation (issue https://github.com/hirrolot/mazeppa/issues/32).
  - Only require `bisect_ppx` and `alcotest` for testing, not for production builds.
 
+### Fixed
+
+ - Properly special-case pretty printing of FFI calls: `call "mz_ffi_xxx" (...)`.
+
 ## 0.7.0 - 2025-11-22
 
 ### Fixed
