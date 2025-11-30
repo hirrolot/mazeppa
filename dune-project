@@ -34,11 +34,13 @@
   ppx_yojson_conv
   (ppx_blob
    (>= 0.9.0))
-  bisect_ppx
+  (bisect_ppx :with-test)
   (menhir
    (>= 20180905))
   (spectrum
    (>= 0.6.0))
   clap
   (alcotest
-   (>= 1.7.0))))
+   (and
+    :with-test
+    (>= 1.7.0)))))
