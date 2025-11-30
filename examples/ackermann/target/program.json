@@ -1,11 +1,7 @@
 [
   [
     [ "ack", [ "m", "n" ], ".g1(=(m, 0u32), m, n)" ],
-    [
-      "main",
-      [ "m", "n" ],
-      "Combine(ack(0u32, 0u32), ack(1u32, 1u32), ack(2u32, 2u32), ack(3u32, 1u32), ack(m, n))"
-    ]
+    [ "main", [ "m", "n" ], "ack(m, n)" ]
   ],
   [
     [

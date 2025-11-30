@@ -240,8 +240,9 @@ X(mz_malloc_atomic, GC_MALLOC_ATOMIC)
 #undef X
 
 #define X(signedness, bitness)                                                 \
-    inline static const mz_prim_##signedness##bitness *                        \
-    mz_priv_box_##signedness##bitness(const mz_prim_##signedness##bitness x) { \
+    inline static const mz_prim_##signedness##bitness                          \
+        *mz_priv_box_##signedness##bitness(                                    \
+            const mz_prim_##signedness##bitness x) {                           \
         mz_prim_##signedness##bitness *const y = mz_malloc_atomic(sizeof(*y)); \
         *y = x;                                                                \
         return y;                                                              \
@@ -419,8 +420,8 @@ X(I)
 #undef X
 
 #define MZ_DATA(tag, nvalues, ...)                                             \
-    ((mz_Value){tag,                                                           \
-                .payload = MZ_PRIV_BOX_MANY(mz_Value, nvalues, __VA_ARGS__)})
+    ((mz_Value){                                                               \
+        tag, .payload = MZ_PRIV_BOX_MANY(mz_Value, nvalues, __VA_ARGS__)})
 #define MZ_EMPTY_DATA(tag) ((mz_Value){tag, .payload = NULL})
 #define MZ_BOOL(b)         ((b) ? MZ_EMPTY_DATA(op_T) : MZ_EMPTY_DATA(op_F))
 

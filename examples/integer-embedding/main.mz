@@ -1,0 +1,7 @@
+// See <https://github.com/hirrolot/mazeppa/issues/32>.
+main(n) := f(0u64, n);
+
+f(i, n) := match =(i, n) {
+    T() -> i,
+    F() -> f(+(i, 1u64), n)
+};

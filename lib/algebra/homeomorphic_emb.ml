@@ -1,8 +1,32 @@
 open Term
 
-(* Since the set of all Mazeppa integers is finite, we can treat each integer as a unique
-   constructor. See issue #12 for more discussion. *)
-let decide_ints (x, y) = Checked_oint.equal_generic x y
+let bit_length (x : Checked_oint.generic) : int =
+    let module S = (val Checked_oint.singleton x) in
+    let rec count acc v =
+        if S.(equal v zero) then acc else count (acc + 1) S.(shift_right_exn v one)
+    in
+    if S.(equal value zero)
+    then 0
+    else if not S.is_signed
+    then count 0 S.value
+    else (
+      let v = S.(if compare value zero < 0 then bit_not value else value) in
+      count 0 v + 1)
+;;
+
+let small_int_threshold = 4
+
+(* Since the set of all Mazeppa integers is finite, we _could_ treat each integer as a
+   unique constructor; however, that would result in supercompilation never terminating in
+   practice. See issues #12 and #32 for the discussions. *)
+let decide_ints (x, y) =
+    Checked_oint.Int_ty.(of_generic x = of_generic y)
+    &&
+    let bx, by = bit_length x, bit_length y in
+    if bx <= small_int_threshold && by <= small_int_threshold
+    then Checked_oint.equal_generic x y
+    else bx <= by
+;;
 
 (* Decides whether strings [s1] and [s2] contain the same characters, possibly in
    different number and/or order. *)

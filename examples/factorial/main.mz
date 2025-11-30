@@ -1,7 +1,4 @@
-main(n) := Combine(
-    factorial(0u32), factorial(1u32), factorial(2u32), factorial(3u32),
-    factorial(4u32), factorial(5u32), factorial(n)
-);
+main(n) := factorial(n);
 
 factorial(n) := match =(n, 0u32) {
     T() -> 1u32,

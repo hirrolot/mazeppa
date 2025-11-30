@@ -1,12 +1,5 @@
 [
-  [
-    [ "fib", [ "n" ], ".g1(=(n, 0u32), n)" ],
-    [
-      "main",
-      [ "n" ],
-      "Combine(fib(0u32), fib(1u32), fib(2u32), fib(3u32), fib(4u32), fib(5u32), fib(6u32), fib(7u32), fib(8u32), fib(9u32), fib(n))"
-    ]
-  ],
+  [ [ "fib", [ "n" ], ".g1(=(n, 0u32), n)" ], [ "main", [ "n" ], "fib(n)" ] ],
   [
     [
       ".g0",

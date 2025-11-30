@@ -1,4 +1,4 @@
-main(m, n) := Combine(1u32, 3u32, 7u32, 13u32, f0(m, n));
+main(m, n) := f0(m, n);
 
 f0(m, n) := match =(m, 0u32) {
     F() -> match =(n, 0u32) {

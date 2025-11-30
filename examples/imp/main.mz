@@ -1,5 +1,6 @@
-main() :=
-    let env := Cell("a", Int(2i32), Cell("x", Int(7u32), Nil()));
+// TODO: investigate if this example supercompiles to a desirable output.
+main(a, x) :=
+    let env := Cell("a", Int(a), Cell("x", Int(x), Nil()));
     fetchCell(evalProgram(example(), env), "out");
 
 // Computes "out = a^x" using a simple while-loop.

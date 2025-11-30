@@ -16,8 +16,9 @@
     ],
     [ "fetchCell", [ "env", "x" ], ".g7(env, x)" ],
     [
-      "main", [],
-      ".f0(Cell(\"a\", Int(2i32), Cell(\"x\", Int(7u32), Nil())))"
+      "main",
+      [ "a", "x" ],
+      ".f0(Cell(\"a\", Int(a), Cell(\"x\", Int(x), Nil())))"
     ],
     [ "updateCell", [ "env", "x", "value" ], ".g9(env, value, x)" ]
   ],

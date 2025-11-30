@@ -778,12 +778,14 @@ See [`test-c-codegen/ffi/`](test-c-codegen/ffi/).
  - Supercompiling a whole user program is not a good idea. Instead, consider supercompiling separate modules and then linking them together (the exact way you do so depends on your situation).
    - Although Mazeppa is itself not parallel, supercompiling separate modules can be done in parallel.
  - It is _much_ better if recursive functions reduce at least one argument structurally, just as in total functional programming. Otherwise, termination checking might not work well.
-   - No integer is embedded in another one: iteration can happen in any order.
+   - Integers are embedded according to their [bit lengths]: iteration can happen in any order.
    - A string _s1_ is embedded in _s2_ iff _set(s1) = set(s2) /\ length(s1) <= length(s2)_, where _set(s)_ is the set of all characters in _s_. This relation is borrowed from [^termination-combinators]; for the proof that this is a well-quasi order, see theorem 3.2 from the same paper. All of the following sequences are well-formed according to this relation:
      - `"abc"`, `"ac"`, `"a"`
      - `"a"`, `"b"`, `"c"`
      - `"c"`, `"b"`, `"a"`
      - `"aa"`, `"ccc"`, `"bbbbaa"`, `"ca"`
+
+[bit lengths]: https://github.com/hirrolot/mazeppa/issues/32
 
 ## Technical decisions
 
