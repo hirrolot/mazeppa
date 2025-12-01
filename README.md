@@ -1,7 +1,7 @@
 # Mazeppa
 [![CI](https://github.com/hirrolot/mazeppa/workflows/OCaml%20CI/badge.svg)](https://github.com/hirrolot/mazeppa/actions)
 
-Supercompilation [^turchin-concept] is a program transformation technique that symbolically evaluates a given program, with run-time values as unknowns. In doing so, it discovers execution patterns of the original program and synthesizes them into standalone functions; the result of supercompilation is a more efficient residual program. In terms of transformational power, supercompilation subsumes both deforestation [^deforestation] and partial evaluation [^partial-evaluation], and even exhibits certain capabilities of theorem proving.
+Supercompilation [^turchin-concept] is a deep program transformation technique that symbolically evaluates a given program, with run-time values as unknowns. In doing so, it discovers execution patterns of the original program and synthesizes them into standalone functions; the result is a more efficient residual program. In terms of transformational power, supercompilation subsumes both deforestation [^deforestation] and partial evaluation [^partial-evaluation], and even exhibits certain capabilities of theorem proving.
 
 _Mazeppa_ is a modern supercompiler intended to be a compilation target for call-by-value functional languages. Having prior supercompilers diligently compared and revised, Mazeppa
   - Provides the full set of primitive data types for efficient computation.
@@ -244,7 +244,7 @@ failover(op, os) := match os {
 
 (Here we represent strings as lists of characters for simplicity, but do not worry, Mazeppa provides built-in strings as well.)
 
-The algorithm is correct but inefficient. Consider what happens when `"aa"` is successfully matched, but `'b'` is not. The algorithm will start matching `"aab"` once again from the second character of `s`, although it can already be said that the second character of `s` is `'a'`. The deterministic finite automaton built by the [Knuth-Morris-Pratt algorithm (KMP)] [^kmp] is an alternative way to solve this problem.
+The algorithm is correct but inefficient. Consider what happens when `"aa"` is successfully matched, but `'b'` is not: the algorithm will start matching `"aab"` once again from the second character of `s`, which is already known to be `'a'`! The DFA built by the [Knuth-Morris-Pratt algorithm (KMP)] [^kmp] is one way to fix the issue.
 
 [Knuth-Morris-Pratt algorithm (KMP)]: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
 
@@ -295,7 +295,7 @@ f4(ss) :=
 
 The naive algorithm that we wrote has been automatically transformed into a well-known efficient version! While the naive algorithm has complexity _O(|p| * |s|)_, the specialized one is _O(|s|)_.
 
-Synthesizing KMP is a standard example that showcases the power of supercompilation with respect to other techniques (e.g., see [^perfect-process-tree] and [^positive-supercomp]). Obtaining KMP by partial evaluation is not possible without changing the original definition of `matches` [^partial-evaluation-matches-1] [^partial-evaluation-matches-2].
+Synthesizing KMP is a standard example that showcases the power of supercompilation with respect to other techniques (e.g., see [^perfect-process-tree] and [^positive-supercomp]). Obtaining KMP by partial evaluation is not possible without changing the definition of `matches` [^partial-evaluation-matches-1] [^partial-evaluation-matches-2].
 
 ## Metasystem transition
 
@@ -352,7 +352,7 @@ indexEnv(env, idx) := match env {
 
 (`eval`/`quote` are sometimes called `reflect`/`reify`.)
 
-This is essentially a big-step machine for efficient capture-avoiding substitution: instead of reconstructing terms on each beta reduction, we maintain an _environment_ of values. `eval` projects a term to the "semantic domain", while `quote` does the opposite; `normalize` is simply the composition of `quote` and `eval`. To avoid bothering with fresh name generation, we put De Bruijn _indices_ in the `Var` constructor and De Bruijn _levels_ in `NVar`; the latter is converted into the former in `quoteNeutral`.
+This is essentially a big-step machine for efficient capture-avoiding substitution: instead of rebuilding terms on each beta reduction, we maintain an _environment_ of values. `eval` projects a term to the "semantic domain", while `quote` does the opposite; `normalize` is simply the composition of `quote` and `eval`. To avoid bothering with naming issues, we put De Bruijn _indices_ in the `Var` constructor and De Bruijn _levels_ in `NVar`; the latter is converted into the former in `quoteNeutral`.
 
 Now let us compute something with this machine:
 
@@ -393,7 +393,7 @@ main() := Lam(
 
 The lambda calculus interpreter has been completely annihilated!
 
-In this example, we have just seen a two-level _metasystem stairway_ (in Turchin's terminology [^turchin-metavariables]): on level 0, we have the Mazeppa supercompiler transforming the object program, while on level 1, we have the object program normalizing lambda calculus terms. There can be an arbitrary number of interpretation levels, and Mazeppa can be used to collapse them all. This general behaviour of supercompilation was explored by Turchin himself in [^turchin-concept] (section 7), where he was able to supercompile two interpretable programs, one Fortran-like and one in Lisp, to obtain a speedup factor of 40 in both cases.
+In this example, we have just seen a two-level _metasystem stairway_ (in Turchin's terminology [^turchin-metavariables]): on level 0, we have Mazeppa transforming the object program, while on level 1, we have the object program normalizing lambda calculus terms. In principle, there can be an arbitrary number of interpretation levels, and Mazeppa can be used to collapse them all. This general behaviour of supercompilation was first explored by Turchin himself in [^turchin-concept], where he was able to supercompile two interpretable programs, one Fortran-like and one in Lisp, to obtain a speedup factor of 40 in both cases.
 
 Related examples: [imperative abstract machine](examples/imp/), [self-interpreter](examples/self-interpreter/).
 
@@ -453,7 +453,7 @@ formula(a, b, c, d, e, f, g) :=
 
 When Mazeppa sees `solve(formula(a, b, c, d, e, f, g))`, it extracts the call to `formula` into a fresh variable `.v0` and proceeds supercompiling the extracted call and `solve(.v0)` in isolation. The latter call will just reproduce the original SAT solver.
 
-But supercompiling the call to `formula` will still result in an exponential blowup. Let us examine why this happens. Our original formula consists of calls to `or` and `and`; while `or` is obviously not dangerous, `and` propagates the `rest` parameter to _both_ branches of `If` (the first `match` case) -- this is the exact place where the blowup occurs. So let us mark `and` with `@extract` as well:
+But supercompiling the call to `formula` will still result in an exponential blowup. Let us examine why this happens. Our original formula only consists of calls to `or` and `and`; while the definition of `or` does not look too dangerous, `and` propagates the potentially massive `rest` parameter to _both_ branches of the generated `If` expression, thus triggering the blowup as time goes on. So let us proceed and mark `and` with `@extract` as well:
 
 ```
 @extract
@@ -462,7 +462,7 @@ and(clause, rest) := match clause {
 };
 ```
 
-That is it! When `and` is to be transformed, Mazeppa will extract the call out of its surrounding context and supercompile it in isolation. By adding two annotations at appropriate places, we have solved both the problem of code blowup and exponential running time of supercompilation. In general, whenever Mazeppa sees `ctx[f(t1, ..., tN)]`, where `f` is marked `@extract` and `ctx[.]` is a non-empty surrounding context with `.` in a _redex position_, it will plug a fresh variable `v` into `ctx` and proceed transforming the following nodes separately: `f(t1, ..., tN)` and `ctx[v]`.
+That is it! When `and` is to be transformed, Mazeppa will immediately extract the call out of its surrounding context and supercompile it in isolation. By adding two annotations at appropriate places, we have solved both the problem of code blowup and exponential running time of supercompilation. In general, whenever Mazeppa sees `ctx[f(t1, ..., tN)]`, where `f` is marked `@extract` and `ctx[.]` is a non-empty surrounding context with `.` in a _redex position_, it will plug a fresh variable `v` into `ctx` and proceed transforming the following nodes separately: `f(t1, ..., tN)` and `ctx[v]`.
 
 Finally, note that `@extract` is only a low-level mechanism; a compiler front-end must carry out additional machinery to tell Mazeppa which functions to extract. This can be done in two ways:
  - By static analysis of your object language. For instance, parameter linearity analysis would mark both `formula` and `and` as extractable, leaving all other functions untouched.
