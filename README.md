@@ -395,8 +395,6 @@ The lambda calculus interpreter has been completely annihilated!
 
 In this example, we have just seen a two-level _metasystem stairway_ (in Turchin's terminology [^turchin-metavariables]): on level 0, we have the Mazeppa supercompiler transforming the object program, while on level 1, we have the object program normalizing lambda calculus terms. There can be an arbitrary number of interpretation levels, and Mazeppa can be used to collapse them all. This general behaviour of supercompilation was explored by Turchin himself in [^turchin-concept] (section 7), where he was able to supercompile two interpretable programs, one Fortran-like and one in Lisp, to obtain a speedup factor of 40 in both cases.
 
-The lambda normalizer also shows us how to incarnate higher-order functions into a first-order language. In Mazeppa, we cannot treat functions as values, but it does not mean that we cannot simulate them! **By performing a metasystem transition, we can efficiently implement higher-order functions in a first-order language.** Along with defunctionalization and closure conversion, this technique can be used for compilation of higher-order languages into efficient first-order code.
-
 Related examples: [imperative abstract machine](examples/imp/), [self-interpreter](examples/self-interpreter/).
 
 ## Restricting supercompilation
@@ -467,7 +465,7 @@ and(clause, rest) := match clause {
 That is it! When `and` is to be transformed, Mazeppa will extract the call out of its surrounding context and supercompile it in isolation. By adding two annotations at appropriate places, we have solved both the problem of code blowup and exponential running time of supercompilation. In general, whenever Mazeppa sees `ctx[f(t1, ..., tN)]`, where `f` is marked `@extract` and `ctx[.]` is a non-empty surrounding context with `.` in a _redex position_, it will plug a fresh variable `v` into `ctx` and proceed transforming the following nodes separately: `f(t1, ..., tN)` and `ctx[v]`.
 
 Finally, note that `@extract` is only a low-level mechanism; a compiler front-end must carry out additional machinery to tell Mazeppa which functions to extract. This can be done in two ways:
- - By static analysis of your object language/Mazeppa code. For example, parameter linearity analysis would mark both `formula` and `and` as extractable, leaving all other functions untouched.
+ - By static analysis of your object language. For instance, parameter linearity analysis would mark both `formula` and `and` as extractable, leaving all other functions untouched.
  - By source code annotations, in a manner similar to [staged compilation].
 
 [staged compilation]: https://okmij.org/ftp/ML/MetaOCaml.html
@@ -809,7 +807,7 @@ See [`test-c-codegen/ffi/`](test-c-codegen/ffi/).
 
 Mazeppa employs several interesting design choices (ranked by importance):
 
- - **First-order code.** Max Bolingbroke and Simon Peyton Jones [^supercomp-by-eval] report that for one particular example, their higher-order supercompiler for a subset of Haskell spent 42% of execution time on managing names and renaming. While it is true that simplistic evaluation models, such as normalization of lambda terms, permit us to avoid significant overhead of capture avoidance, supercompilation is more complicated. For example, besides doing symbolic computation, supercompilation needs to analyze previously computed results to make informed decisions about further transformation: consider term instance tests, homeomorphic embedding tests, most specific generalizations, etc. Introducing higher-order functions inevitably complicates all these analyses, making supercompilation slower, more memory-consuming, and harder to reason about. In Mazeppa, we stick with the philosophy of gradual improvements: instead of trying to handle many fancy features at the same time, we 1) fix the _core_ language for convenient manipulation by a machine, 2) perform as many metasystem transitions as necessary to make the core language better for human.
+ - **First-order code.** Max Bolingbroke and Simon Peyton Jones [^supercomp-by-eval] report that for one particular example, their higher-order supercompiler for a subset of Haskell spent 42% of execution time on managing names and renaming. While it is true that simplistic evaluation models, such as normalization of lambda terms, permit us to avoid significant overhead of capture avoidance, supercompilation is more complicated. For instance, besides doing symbolic computation, supercompilation needs to analyze previously computed results to make informed decisions about further transformation: consider term instance tests, homeomorphic embedding tests, most specific generalizations, etc. Introducing higher-order functions inevitably complicates all these analyses, making supercompilation slower, more memory-consuming, and harder to reason about. In Mazeppa, we stick with the philosophy of gradual improvements: instead of trying to handle many fancy features at the same time, we 1) fix the _core_ language for convenient manipulation by a machine, 2) perform as many metasystem transitions as necessary to make the core language better for human.
 
  - **Lazy constructors.** It is a well-known observation that call-by-value languages are hard for proper deforestation. It is still possible to deforest them, but not without additional analysis [^CbV-supercomp] [^CbV-supercomp-next]. However, if constructors are lazy (i.e., they do not evaluate their arguments), deforestation _just works_. Turchin made it work by normal-order transformation of a call-by-value language, but the result is that residual code may terminate more often. In Mazeppa, we have call-by-value functions and call-by-name (call-by-need) constructors, which 1) makes deforestation possible and 2) preserves the original semantics of code.
    - Incidentally, lazy constructors are also adopted by eager functional languages outside of supercompilation. See [_"Why is Idris 2 so much faster than Idris 1?"_](https://www.type-driven.org.uk/edwinb/why-is-idris-2-so-much-faster-than-idris-1.html) and _"CONS Should Not Evaluate its Arguments"_ [^cons-lazy-alloc].
@@ -848,14 +846,6 @@ Mazeppa employs several interesting design choices (ranked by importance):
 
 While most of the above is not particularly novel, we believe that the combination of these features makes Mazeppa a more practical alternative than its predecessors.
 
-## Further research
-
- - Can supercompilation be used to erase unnecessary information from dependently typed programs [^dependent-types-erasure]?
- - Is it possible to devise heuristics that would guarantee predictability of supercompilation? (E.g., by dynamically marking misbehaving functions as extractable.)
- - What if we [partially evaluate](https://ocaml.org/manual/latest/flambda.html) the supercompiler based on a set of function definitions (e.g., some fixed interpreter)? This could make supercompilation significantly more efficient.
- - _Equality indices_ [^equality-indices] can enhance dynamic sharing of arguments. Would it be beneficial to implement them in Mazeppa?
- - Suppose that there exists a dirty language _L_, a pure interpreter _I_ for _L_, and a fixed program _P_ in _L_. By supercompiling _I(P, data)_, where _data_ is unknown, we should be able to automatically _purify_ the program _P_! Likewise, we should be able to purify not only all programs in _L_, but also all dirty languages with interpretive definitions in Mazeppa.
-
 ## Language definition
 
 ### Lexical structure
@@ -871,7 +861,7 @@ There are four classes of _unsigned integer constants_:
 Notes:
  - For convenience of reading, each unsigned integer constant may contain underscore characters (`_`) except for the first position in the sequence of digits.
  - For each unsigned integer constant, there is a _negated integer constant_ formed by the negation character (`-`) placed right before the sequence of digits and underscore characters.
- - For each unsigned and negated integer constant, there is a _typed integer constant_ `<INT>` produced by appending an integer type `<INT-TY>` (`u8`, `u16`, `u32`, `u64`, `u128`, `i8`, `i16`, `i32`, `i64`, `i128`) right after the original integer constant. For example, the constants `123i8`, `123u16`, and `123i32` all belong to the set `<INT>`.
+ - For each unsigned and negated integer constant, there is a _typed integer constant_ `<INT>` produced by appending an integer type `<INT-TY>` (`u8`, `u16`, `u32`, `u64`, `u128`, `i8`, `i16`, `i32`, `i64`, `i128`) right after the original integer constant. For instance, the constants `123i8`, `123u16`, and `123i32` all belong to the set `<INT>`.
 
 A _string constant_ `<STRING>` is a sequence, between double quotes (`"`), of zero or more printable characters (we refer to printable characters as those numbered 33-126 in the ASCII character set), spaces, or _string escape sequences_:
 
@@ -947,7 +937,7 @@ If a program, function, or term conforms to these restrictions, we call it _well
 | `let p := t; u` | `match t { p -> u }` | `p` is in `<pattern>` |
 | `c` | _ASCII(c)_ | `c` is in `<CHAR>` |
 
-where _ASCII(c)_ is an appropriate `u8` integer constant, according to the ASCII table; for example, _ASCII(`'a'`)_ is `97u8`.
+where _ASCII(c)_ is an appropriate `u8` integer constant, according to the ASCII table; for instance, _ASCII(`'a'`)_ is `97u8`.
 
 ### Evaluation
 
@@ -1055,10 +1045,6 @@ Since Mazeppa is a purely functional language, the only way to implement I/O is 
 
 No, we do not think that a type system is necessary at this point. It is the responsibility of a front-end compiler to ensure that programs do not "go wrong".
 
-### Can I use Mazeppa for theorem proving?
-
-The more we make supercompilation predictable, the less it is capable of theorem proving. For those interested in program analysis rather than optimization, we suggest looking into _distillation_ [^distillation-theorem-proving].
-
 ### Where can I learn more about supercompilation?
 
 For the English audience, the following paper presents a decent introduction into supercompilation:
@@ -1074,20 +1060,6 @@ Mazeppa itself is inspired by this excellent paper (in English):
 
 Finally, the international META workshops are great collections of articles about supercompilation and adjacent fields:
  - [META 2008](http://meta2008.pereslavl.ru/), [META 2010](http://meta2010.pereslavl.ru/), [META 2012](http://meta2012.pereslavl.ru/), [META 2014](http://meta2014.pereslavl.ru/), [META 2016](http://meta2016.pereslavl.ru/)
-
-### Can supercompilation be even more powerful?
-
-Several approaches can lead to _superlinear speedup_ of non-esoteric programs by supercompilation:
-
- - _Jungle driving_ (appeared 2001) [^jungle-driving] uses _jungle evaluation_ [^jungle-evaluation] as an advanced driving strategy for first-order positive supercompilation. The key idea behind jungle evaluation is to share as much computation as theoretically possible by reducing graphs (jungles) instead of terms. Consider that the structure of a supercompiled program reflects the way it will be executed at run-time; in turn, the strategy of driving is what affects the structure. Driving jungles instead of terms can therefore lead to _exponentially_ more efficient residual programs, but the (seemingly inevitable) cost of managing jungles remains at compile-time!
- - _Distillation_ (appeared 2007) [^distillation] [^distillation-essence] [^distillation-graphs] [^distillation-lts] is an upgraded version of higher-order positive supercompilation. The main difference is that generalization and folding are performed with respect to graphs instead of terms, thus allowing the [distiller] to make more insightful decisions about program transformation.
-   - Furthermore, distillation can be employed to define a [_hierarchy of program transformers_] [^hamilton-700], where each higher-level transformer is progressively more powerful than lower-level ones.
- - _Higher-level supercompilation_ [^higher-level-supercomp] utilizes lower-level supercompilers to discover lemmas about term equivalences, which are then used by higher-level supercompilers for insightful term rewriting. However, to the best of our knowledge, no fully automatic procedure for discovering (and applying) lemmas in the infinite search space has been proposed yet.
-
-[distiller]: https://github.com/poitin/Distiller
-[_hierarchy of program transformers_]: https://github.com/poitin/Higher-Level-Transformer
-
-None of the above is planned to be implemented in Mazeppa, because 1) we think that writing asymptotically good programs is the responsibility of the programmer, not the optimizer, and 2) predictability of supercompilation is of greater importance to us. However, for those who are interested in this topic, the references may be helpful.
 
 ### How do I contribute?
 
@@ -1137,10 +1109,6 @@ Just fork the repository, work in your own branch, and submit a pull request. Pr
 
 [^supercomp-code-explosion]: Jonsson, Peter & Nordlander, Johan. (2011). Taming code explosion in supercompilation. PERM'11 - Proceedings of the 20th ACM SIGPLAN Workshop on Partial Evaluation and Program Manipulation. 33-42. 10.1145/1929501.1929507.
 
-[^dependent-types-erasure]: Tejiščák, Matúš. Erasure in dependently typed programming. Diss. University of St Andrews, 2020.
-
-[^equality-indices]: Glück, Robert, Andrei Klimov, and Antonina Nepeivoda. "Nonlinear Configurations for Superlinear Speedup by Supercompilation." Fifth International Valentin Turchin Workshop on Metacomputation. 2016.
-
 [^awkward-squad]: Peyton Jones, Simon. (2002). Tackling the Awkward Squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell.
 
 [^supercomp-ideas-and-methods]: Klyuchnikov, Ilya, and Dimitur Krustev. "Supercompilation: Ideas and methods." The Monad. Reader Issue 23 (2014): 17.
@@ -1150,21 +1118,3 @@ Just fork the repository, work in your own branch, and submit a pull request. Pr
 [^supercomp-homeomorphic]: Romanenko, Sergei. (2018). Supercompilation: homeomorphic embedding, call-by-name, partial evaluation. Keldysh Institute Preprints. 1-32. 10.20948/prepr-2018-209.
 
 [^metacomp-by-supercomp]: Robert Glück and Morten Heine Sørensen. 1996. A Roadmap to Metacomputation by Supercompilation. In Selected Papers from the International Seminar on Partial Evaluation. Springer-Verlag, Berlin, Heidelberg, 137–160. https://dl.acm.org/doi/10.5555/647372.724040
-
-[^jungle-driving]: Secher, J.P. (2001). Driving in the Jungle. In: Danvy, O., Filinski, A. (eds) Programs as Data Objects. PADO 2001. Lecture Notes in Computer Science, vol 2053. Springer, Berlin, Heidelberg. https://doi.org/10.1007/3-540-44978-7_12
-
-[^jungle-evaluation]: Hoffmann, B., Plump, D. (1988). Jungle evaluation for efficient term rewriting. In: Grabowski, J., Lescanne, P., Wechler, W. (eds) Algebraic and Logic Programming. ALP 1988. Lecture Notes in Computer Science, vol 343. Springer, Berlin, Heidelberg. https://doi.org/10.1007/3-540-50667-5_71
-
-[^distillation]: Hamilton, Geoff. (2007). Distillation: Extracting the essence of programs. Proceedings of the ACM SIGPLAN Symposium on Partial Evaluation and Semantics-Based Program Manipulation. 61-70. 10.1145/1244381.1244391.
-
-[^distillation-essence]: Hamilton, G.W. (2010). Extracting the Essence of Distillation. In: Pnueli, A., Virbitskaite, I., Voronkov, A. (eds) Perspectives of Systems Informatics. PSI 2009. Lecture Notes in Computer Science, vol 5947. Springer, Berlin, Heidelberg. https://doi.org/10.1007/978-3-642-11486-1_13
-
-[^distillation-graphs]: Hamilton, Geoff & Mendel-Gleason, Gavin. (2010). A Graph-Based Definition of Distillation.
-
-[^distillation-lts]: Hamilton, Geoff & Jones, Neil. (2012). Distillation with labelled transition systems. Conference Record of the Annual ACM Symposium on Principles of Programming Languages. 15-24. 10.1145/2103746.2103753.
-
-[^distillation-theorem-proving]: G. W. Hamilton. 2006. Poitín: Distilling Theorems From Conjectures. Electron. Notes Theor. Comput. Sci. 151, 1 (March, 2006), 143–160. https://doi.org/10.1016/j.entcs.2005.11.028
-
-[^hamilton-700]: Hamilton, Geoff. "The Next 700 Program Transformers." International Symposium on Logic-Based Program Synthesis and Transformation. Cham: Springer International Publishing, 2021.
-
-[^higher-level-supercomp]: Klyuchnikov, Ilya, and Sergei Romanenko. "Towards higher-level supercompilation." Second International Workshop on Metacomputation in Russia. Vol. 2. No. 4.2. 2010.
