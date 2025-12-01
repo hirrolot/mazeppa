@@ -1,6 +1,9 @@
 main(i) := f0(>(i, call "mz_ffi_limit" ()), i);
 
-f0(v0, i) := match v0 {
-    F() -> let v1 := +(i, 1i32); f0(>(v1, call "mz_ffi_limit" ()), v1),
+f0(v0, i) :=
+    match v0 {
+    F() ->
+    let v1 := +(i, 1i32);
+    f0(>(v1, call "mz_ffi_limit" ()), v1),
     T() -> Done()
-};
+    };

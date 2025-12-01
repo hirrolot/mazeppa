@@ -1,10 +1,21 @@
-main(a, b, c, d, e, f, g) := f8(f7(let v4 := let v3 := let v2 := f7(let v1 :=
-    let v0 := If(g, If(d, If(b, F(), f0()), f0()), f0());
-    If(a, f1(v0), f4(v0, a, c));
-    If(f, f5(v1, e, g), f1(v1)), a, b, c);
-    If(g, f4(v2, c, d), f1(v2));
-    If(e, f1(v3), f5(v3, g, f));
-    If(f, If(e, f1(v4), f6(v4, g)), f1(v4)), a, b, c));
+main(a, b, c, d, e, f, g) := f8(
+    f7(
+        let v4 :=
+            let v3 :=
+                let v2 := f7(
+                    let v1 :=
+                        let v0 := If(g, If(d, If(b, F(), f0()), f0()), f0());
+                        If(a, f1(v0), f4(v0, a, c));
+                    If(f, f5(v1, e, g), f1(v1)),
+                    a,
+                    b,
+                    c);
+                If(g, f4(v2, c, d), f1(v2));
+            If(e, f1(v3), f5(v3, g, f));
+        If(f, If(e, f1(v4), f6(v4, g)), f1(v4)),
+        a,
+        b,
+        c));
 
 f0() := T();
 
@@ -22,13 +33,15 @@ f6(v0, c) := If(c, f3(v0), f1(v0));
 
 f7(v0, a, b, c) := If(a, f1(v0), If(b, f6(v0, c), f1(v0)));
 
-f8(v0) := match v0 {
+f8(v0) :=
+    match v0 {
     F() -> F(),
-    If(x, m, n) -> match x {
-        F() -> f9(n),
-        T() -> f9(m)
+    If(x, m, n) ->
+    match x {
+    F() -> f9(n),
+    T() -> f9(m)
     },
     T() -> T()
-};
+    };
 
 f9(n) := f8(n);

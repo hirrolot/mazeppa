@@ -1,12 +1,14 @@
 main(xs, op1, op2) := f1(op1, op2, xs);
 
-f0(x, op1) := match op1 {
+f0(x, op1) :=
+    match op1 {
     F() -> +(x, 5i32),
     G() -> /(x, 10i32),
     H() -> *(x, x)
-};
+    };
 
-f1(op1, op2, xs) := match xs {
+f1(op1, op2, xs) :=
+    match xs {
     Cons(x, xs') -> Cons(f0(f0(x, op1), op2), f1(op1, op2, xs')),
     Nil() -> Nil()
-};
+    };

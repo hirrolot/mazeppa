@@ -7,52 +7,56 @@ let print_symbol_list list = comma_sep (List.map print_symbol list)
 let rec print = function
   | Raw_term.Var x -> print_symbol x
   | Raw_term.Const const -> atom (Const.to_string const)
-  | Raw_term.Call (op, args) ->
-    (* Since residual code may contain some deeply nested function calls, [~nest:4] would
-       not be a good idea. *)
-    (if Symbol.is_foreign_function op
-     then [ atom "call"; space; atom "\""; print_symbol op; atom "\""; space ]
-     else [ print_symbol op ])
-    @ [ parens [ comma_sep (List.map print args) ] ]
+  | Raw_term.Call (op, args) when Symbol.is_foreign_function op ->
+    [ atom "call"; space; atom "\""; print_symbol op; atom "\""; space; print_args args ]
     |> combine
+  | Raw_term.Call (op, args) -> [ print_symbol op; print_args args ] |> combine
   | Raw_term.Match (t, [ (pattern, u) ]) -> print_let (print_pattern pattern, t, u)
   | Raw_term.Match (t, cases) ->
+    let scrutinee_doc = [ atom "match"; space; print t ] |> combine in
     let cases_doc =
-        [ combine ~sep:[ atom "," ] ~nest:4 (List.map print_case cases); hardline ]
+        [ combine ~sep:[ atom "," ] (List.map print_case cases); hardline ]
         |> braces ~group:true
     in
-    [ atom "match"; space; print t; space; cases_doc ] |> combine
+    [ scrutinee_doc; space; cases_doc ] |> combine
   | Raw_term.Let (x, t, u) -> print_let (print_symbol x, t, u)
 
-and print_flat = function
-  | Raw_term.Let _ as t -> combine ~group:true [ break 0; print t ]
+and print' ?nest = function
+  | Raw_term.(Match _ | Let _) as t -> combine ?nest [ hardline; print t ]
   | t -> print t
 
+and print_args args =
+    [ break 0; args |> List.map print |> combine ~sep:[ atom ","; break 1 ] ]
+    |> parens ~group:true ~nest:4
+
 and print_let (init_doc, t, u) =
-    [ combine [ atom "let"; space; init_doc; space; atom ":="; space; print t ]
-    ; combine [ atom ";"; break 1; print u ]
+    [ atom "let"
+    ; space
+    ; init_doc
+    ; space
+    ; atom ":="
+    ; space
+    ; print' ~nest:4 t
+    ; atom ";"
+    ; hardline
+    ; combine [ print u ]
     ]
-    |> combine ~group:true
+    |> combine
 
 and print_case (pattern, t) =
-    [ hardline; print_pattern pattern; space; atom "->"; space; print_flat t ] |> combine
+    [ hardline; print_pattern pattern; space; atom "->"; space; print' t ] |> combine
 
 and print_pattern (c, c_params) =
     [ print_symbol c; parens [ print_symbol_list c_params ] ] |> combine
 ;;
 
-(* There are no attributes in residual code, so do not try to print them. *)
-let print_def (_attrs, op, params, body) =
-    let go_body = function
-      | Raw_term.Match _ as body -> print body
-      | Raw_term.(Var _ | Const _ | Call _ | Let _) as body ->
-        combine ~nest:4 [ print_flat body ]
-    in
+let print_def (attrs, op, params, body) =
+    assert (List.is_empty attrs);
     [ [ print_symbol op; parens [ print_symbol_list params ] ] |> combine
     ; space
     ; atom ":="
     ; space
-    ; go_body body
+    ; print' ~nest:4 body
     ; atom ";"
     ]
     |> combine

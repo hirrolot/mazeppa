@@ -1,30 +1,37 @@
 main(stmt) := f0(stmt);
 
-f0(stmt) := match stmt {
-    If1(cond, then, else) -> match cond {
-        F() -> f1(else),
-        T() -> f1(then),
-        Var(env, x) -> match f2(env, x) {
-            F() -> f1(else),
-            T() -> f1(then)
-        }
-    },
-    If2(cond, then, else) -> match cond {
-        F() -> f1(else),
-        T() -> f1(then),
-        Var(env, x) -> match f2(env, x) {
-            F() -> f1(else),
-            T() -> f1(then)
-        }
+f0(stmt) :=
+    match stmt {
+    If1(cond, then, else) ->
+    match cond {
+    F() -> f1(else),
+    T() -> f1(then),
+    Var(env, x) ->
+    match f2(env, x) {
+    F() -> f1(else),
+    T() -> f1(then)
     }
-};
+    },
+    If2(cond, then, else) ->
+    match cond {
+    F() -> f1(else),
+    T() -> f1(then),
+    Var(env, x) ->
+    match f2(env, x) {
+    F() -> f1(else),
+    T() -> f1(then)
+    }
+    }
+    };
 
 f1(else) := f0(else);
 
-f2(env, x) := match env {
-    Cell(y, value, xs) -> match =(x, y) {
-        F() -> f2(xs, x),
-        T() -> value
+f2(env, x) :=
+    match env {
+    Cell(y, value, xs) ->
+    match =(x, y) {
+    F() -> f2(xs, x),
+    T() -> value
     },
     Nil() -> Panic(++("the variable is unbound: ", x))
-};
+    };

@@ -1,20 +1,25 @@
-main(i) := match i {
-    Cons(c', j) -> match =(97u8, c') {
-        F() -> None(),
-        T() -> f0(j)
+main(i) :=
+    match i {
+    Cons(c', j) ->
+    match =(97u8, c') {
+    F() -> None(),
+    T() -> f0(j)
     },
     Nil() -> None()
-};
+    };
 
-f0(j) := match j {
-    Cons(c', j') -> match =(97u8, c') {
-        F() -> match =(98u8, c') {
-            F() -> Some(Cons(c', j')),
-            T() -> f1(j')
-        },
-        T() -> f1(j')
+f0(j) :=
+    match j {
+    Cons(c', j') ->
+    match =(97u8, c') {
+    F() ->
+    match =(98u8, c') {
+    F() -> Some(Cons(c', j')),
+    T() -> f1(j')
+    },
+    T() -> f1(j')
     },
     Nil() -> Some(Nil())
-};
+    };
 
 f1(j) := f0(j);

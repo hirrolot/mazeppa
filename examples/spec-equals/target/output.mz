@@ -1,10 +1,13 @@
-main(x) := match x {
-    S(y) -> match y {
-        S(y') -> match y' {
-            S(_y) -> F(),
-            Z() -> T()
-        },
-        Z() -> F()
+main(x) :=
+    match x {
+    S(y) ->
+    match y {
+    S(y') ->
+    match y' {
+    S(_y) -> F(),
+    Z() -> T()
     },
     Z() -> F()
-};
+    },
+    Z() -> F()
+    };

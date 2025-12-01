@@ -1,14 +1,17 @@
-main(xs, ys) := match xs {
+main(xs, ys) :=
+    match xs {
     Cons(x, xs') -> f0(x, xs', ys),
     Nil() -> f1(ys)
-};
+    };
 
-f0(x, xs, ys) := match ys {
-    Cons(x', xs') -> match xs {
-        Cons(x'', xs'') -> Cons(Pair(Blah(x), Blah(x')), f0(x'', xs'', xs')),
-        Nil() -> Cons(Pair(Blah(x), Blah(x')), f1(xs'))
+f0(x, xs, ys) :=
+    match ys {
+    Cons(x', xs') ->
+    match xs {
+    Cons(x'', xs'') -> Cons(Pair(Blah(x), Blah(x')), f0(x'', xs'', xs')),
+    Nil() -> Cons(Pair(Blah(x), Blah(x')), f1(xs'))
     },
     Nil() -> Nil()
-};
+    };
 
 f1(xs) := Nil();

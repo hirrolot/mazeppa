@@ -1,17 +1,47 @@
-main() := Combine(BitNot(255u8, 0u8), StringOf("123", "-123"), StringOfChar("a",
-    "\xFF"), Cast(123i32, 123u8, 123u8, Panic("out of range: `u16(-123i8)`")),
-    Add(35u8, Panic("out of range: `+(255u8, 1u8)`"), Panic(
-    "out of range: `+(-128i8, -1i8)`")), Sub(5u8, Panic(
-    "out of range: `-(127i8, -1i8)`"), Panic("out of range: `-(0u8, 1u8)`")),
-    Mul(60u8, -127i8, Panic("out of range: `*(255u8, 2u8)`"), Panic(
-    "out of range: `*(-128i8, -1i8)`"), Panic("out of range: `*(-128i8, 2i8)`"),
-    Panic("out of range: `*(127i8, -2i8)`")), Div(6u8, 3u8, Panic(
-    "out of range: `/(1u8, 0u8)`"), Panic("out of range: `/(-128i8, -1i8)`")),
-    Rem(0u8, 3u8, Panic("out of range: `%(1u8, 0u8)`"), Panic(
-    "out of range: `%(-128i8, -1i8)`")), BitOr(110u8, -10i8), BitAnd(32u8, 68i8)
-    , BitXor(78u8, -78i8), LeftShift(80u8, Panic(
-    "out of range: `<<(42i8, -1i8)`"), Panic("out of range: `<<(42u8, 9u8)`")),
-    RightShift(5u8, Panic("out of range: `>>(42i8, -1i8)`"), Panic(
-    "out of range: `>>(42u8, 9u8)`")), Equal(T(), F()), NotEqual(F(), T()),
-    GreaterThan(T(), F(), F()), GreaterThanEqual(T(), T(), F()), LessThan(T(), F
-    (), F()), LessThanEqual(T(), T(), F()));
+main() := Combine(
+    BitNot(255u8, 0u8),
+    StringOf("123", "-123"),
+    StringOfChar("a", "\xFF"),
+    Cast(123i32, 123u8, 123u8, Panic("out of range: `u16(-123i8)`")),
+    Add(
+        35u8,
+        Panic("out of range: `+(255u8, 1u8)`"),
+        Panic("out of range: `+(-128i8, -1i8)`")),
+    Sub(
+        5u8,
+        Panic("out of range: `-(127i8, -1i8)`"),
+        Panic("out of range: `-(0u8, 1u8)`")),
+    Mul(
+        60u8,
+        -127i8,
+        Panic("out of range: `*(255u8, 2u8)`"),
+        Panic("out of range: `*(-128i8, -1i8)`"),
+        Panic("out of range: `*(-128i8, 2i8)`"),
+        Panic("out of range: `*(127i8, -2i8)`")),
+    Div(
+        6u8,
+        3u8,
+        Panic("out of range: `/(1u8, 0u8)`"),
+        Panic("out of range: `/(-128i8, -1i8)`")),
+    Rem(
+        0u8,
+        3u8,
+        Panic("out of range: `%(1u8, 0u8)`"),
+        Panic("out of range: `%(-128i8, -1i8)`")),
+    BitOr(110u8, -10i8),
+    BitAnd(32u8, 68i8),
+    BitXor(78u8, -78i8),
+    LeftShift(
+        80u8,
+        Panic("out of range: `<<(42i8, -1i8)`"),
+        Panic("out of range: `<<(42u8, 9u8)`")),
+    RightShift(
+        5u8,
+        Panic("out of range: `>>(42i8, -1i8)`"),
+        Panic("out of range: `>>(42u8, 9u8)`")),
+    Equal(T(), F()),
+    NotEqual(F(), T()),
+    GreaterThan(T(), F(), F()),
+    GreaterThanEqual(T(), T(), F()),
+    LessThan(T(), F(), F()),
+    LessThanEqual(T(), T(), F()));

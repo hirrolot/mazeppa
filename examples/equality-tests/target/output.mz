@@ -1,7 +1,9 @@
-main(x) := match =(x, 0i32) {
-    F() -> match !=(x, 10i32) {
-        F() -> "Good 3",
-        T() -> "Good 2"
+main(x) :=
+    match =(x, 0i32) {
+    F() ->
+    match !=(x, 10i32) {
+    F() -> "Good 3",
+    T() -> "Good 2"
     },
     T() -> "Good 1"
-};
+    };

@@ -1,9 +1,11 @@
 main(xs, ys) := f0(xs, ys);
 
-f0(xs, ys) := match xs {
-    Cons(x, xs') -> match ys {
-        Cons(y, ys') -> +(*(x, y), f0(xs', ys')),
-        Nil() -> 0i32
+f0(xs, ys) :=
+    match xs {
+    Cons(x, xs') ->
+    match ys {
+    Cons(y, ys') -> +(*(x, y), f0(xs', ys')),
+    Nil() -> 0i32
     },
     Nil() -> 0i32
-};
+    };

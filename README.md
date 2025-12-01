@@ -126,10 +126,11 @@ target
 ```
 main(xs) := f0(xs);
 
-f0(xs) := match xs {
+f0(xs) :=
+    match xs {
     Cons(x, xs') -> +(*(x, x), f0(xs')),
     Nil() -> 0i32
-};
+    };
 ```
 
 The supercompiler has successfully merged `sum` and `mapSq` into a single function, `f0`! Unlike the original program, `f0` works in a single pass, without having to allocate any extra memory.
@@ -205,7 +206,9 @@ square(a) := *(a, a);
 
 [[`examples/power-sq/target/output.mz`](examples/power-sq/target/output.mz)]
 ```
-main(a) := let v0 := *(a, *(a, a)); *(a, *(v0, v0));
+main(a) :=
+    let v0 := *(a, *(a, a));
+    *(a, *(v0, v0));
 ```
 
 The whole `powerSq` function has been eliminated, thus achieving the effect of partial evaluation. (If we consider `powerSq` to be an interpreter for a program `x` and input data `a`, then it is the first Futamura projection: specializing an interpreter to obtain an efficient target program.) Also, notice how the supercompiler has managed to _share_ the argument `*(a, *(a, a))` twice, so that it is not recomputed each time anew. The residual program indeed reflects exponentiation by squaring.
@@ -251,36 +254,43 @@ By running Mazeppa on the above sample, we can obtain an efficient string matchi
 ```
 main(s) := f0(s);
 
-f0(s) := match s {
-    Cons(s', ss) -> match =(97u8, s') {
-        F() -> f1(ss),
-        T() -> f2(ss)
+f0(s) :=
+    match s {
+    Cons(s', ss) ->
+    match =(97u8, s') {
+    F() -> f1(ss),
+    T() -> f2(ss)
     },
     Nil() -> F()
-};
+    };
 
 f1(ss) := f0(ss);
 
-f2(ss) := match ss {
-    Cons(s, ss') -> match =(97u8, s) {
-        F() -> f1(ss'),
-        T() -> f4(ss')
+f2(ss) :=
+    match ss {
+    Cons(s, ss') ->
+    match =(97u8, s) {
+    F() -> f1(ss'),
+    T() -> f4(ss')
     },
     Nil() -> F()
-};
+    };
 
 f3(ss) := f2(ss);
 
-f4(ss) := match ss {
-    Cons(s, ss') -> match =(98u8, s) {
-        F() -> match =(97u8, s) {
-            F() -> f1(ss'),
-            T() -> f4(ss')
-        },
-        T() -> T()
+f4(ss) :=
+    match ss {
+    Cons(s, ss') ->
+    match =(98u8, s) {
+    F() ->
+    match =(97u8, s) {
+    F() -> f1(ss'),
+    T() -> f4(ss')
+    },
+    T() -> T()
     },
     Nil() -> F()
-};
+    };
 ```
 
 The naive algorithm that we wrote has been automatically transformed into a well-known efficient version! While the naive algorithm has complexity _O(|p| * |s|)_, the specialized one is _O(|s|)_.
@@ -369,8 +379,16 @@ By supercompiling `main()`, we obtain the Church numeral of 6:
 
 [[`examples/lambda-calculus/target/output.mz`](examples/lambda-calculus/target/output.mz)]
 ```
-main() := Lam(Lam(Appl(Var(1u64), Appl(Var(1u64), Appl(Var(1u64), Appl(Var(1u64)
-    , Appl(Var(1u64), Appl(Var(1u64), Var(0u64)))))))));
+main() := Lam(
+    Lam(
+        Appl(
+            Var(1u64),
+            Appl(
+                Var(1u64),
+                Appl(
+                    Var(1u64),
+                    Appl(Var(1u64), Appl(Var(1u64), Appl(Var(1u64), Var(0u64))))
+                    )))));
 ```
 
 The lambda calculus interpreter has been completely annihilated!
@@ -746,7 +764,7 @@ Now what is left is to actually invoke the generated `fib` function. Create `mai
 ```c
 #include "mazeppa.h"
 
-mz_Value fib(mz_Value n);
+extern mz_Value fib(mz_Value n);
 
 int main(void) {
     // Always initialize Boehm GC before invoking Mazeppa code.

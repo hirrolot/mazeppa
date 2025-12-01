@@ -1,1 +1,5 @@
-main(p) := let Pair(x1, x2) := let Pair(x1, x2) := p; x1; x2;
+main(p) :=
+    let Pair(x1, x2) :=
+        let Pair(x1, x2) := p;
+        x1;
+    x2;

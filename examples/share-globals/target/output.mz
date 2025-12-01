@@ -1,6 +1,7 @@
 main(x, y) := Pair(f0(x), f0(y));
 
-f0(x) := match x {
+f0(x) :=
+    match x {
     A(x') -> B(x'),
     C(x') -> D(x')
-};
+    };

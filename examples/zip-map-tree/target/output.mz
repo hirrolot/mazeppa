@@ -1,25 +1,36 @@
-main(xs, ys) := match xs {
+main(xs, ys) :=
+    match xs {
     Empty() -> f0(ys),
     Node(lhs, x, rhs) -> f1(lhs, x, rhs, ys)
-};
+    };
 
 f0(ys) := Empty();
 
-f1(lhs, x, rhs, ys) := match ys {
+f1(lhs, x, rhs, ys) :=
+    match ys {
     Empty() -> Empty(),
-    Node(lhs', x', rhs') -> match lhs {
-        Empty() -> match rhs {
-            Empty() -> Node(f0(lhs'), Pair(Blah(x), Blah(x')), f0(rhs')),
-            Node(lhs'', x'', rhs'') -> Node(f0(lhs'), Pair(Blah(x), Blah(x')),
-            f2(lhs'', x'', rhs'', rhs'))
-        },
-        Node(lhs'', x'', rhs'') -> match rhs {
-            Empty() -> Node(f2(lhs'', x'', rhs'', lhs'), Pair(Blah(x), Blah(x'))
-            , f0(rhs')),
-            Node(lhs''', x''', rhs''') -> Node(f2(lhs'', x'', rhs'', lhs'), Pair
-            (Blah(x), Blah(x')), f2(lhs''', x''', rhs''', rhs'))
-        }
+    Node(lhs', x', rhs') ->
+    match lhs {
+    Empty() ->
+    match rhs {
+    Empty() -> Node(f0(lhs'), Pair(Blah(x), Blah(x')), f0(rhs')),
+    Node(lhs'', x'', rhs'') -> Node(
+        f0(lhs'),
+        Pair(Blah(x), Blah(x')),
+        f2(lhs'', x'', rhs'', rhs'))
+    },
+    Node(lhs'', x'', rhs'') ->
+    match rhs {
+    Empty() -> Node(
+        f2(lhs'', x'', rhs'', lhs'),
+        Pair(Blah(x), Blah(x')),
+        f0(rhs')),
+    Node(lhs''', x''', rhs''') -> Node(
+        f2(lhs'', x'', rhs'', lhs'),
+        Pair(Blah(x), Blah(x')),
+        f2(lhs''', x''', rhs''', rhs'))
     }
-};
+    }
+    };
 
 f2(lhs, x, rhs, rhs') := f1(lhs, x, rhs, rhs');

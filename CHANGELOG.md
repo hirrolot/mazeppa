@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
  - Check integers according to their bit lengths for more predictable supercompilation (issue https://github.com/hirrolot/mazeppa/issues/32).
+ - Implement a more reasonable pretty-printer for output code.
  - Only require `bisect_ppx` and `alcotest` for testing, not for production builds.
 
 ### Fixed

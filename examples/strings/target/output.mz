@@ -1,5 +1,11 @@
-main() := Combine(Identity("hello world", "hello world", "hello world"),
-    LengthOf(11u64), Equal(T(), F()), NotEqual(F(), T()), GreaterThan(T(), F(),
-    F()), GreaterThanEqual(T(), T(), F()), LessThan(T(), F(), F()),
-    LessThanEqual(T(), T(), F()), PlusPlus("abcdef", "abcdefghi"), CharAt(104u8,
-    100u8, Panic("out of bounds: `11u64`")));
+main() := Combine(
+    Identity("hello world", "hello world", "hello world"),
+    LengthOf(11u64),
+    Equal(T(), F()),
+    NotEqual(F(), T()),
+    GreaterThan(T(), F(), F()),
+    GreaterThanEqual(T(), T(), F()),
+    LessThan(T(), F(), F()),
+    LessThanEqual(T(), T(), F()),
+    PlusPlus("abcdef", "abcdefghi"),
+    CharAt(104u8, 100u8, Panic("out of bounds: `11u64`")));
