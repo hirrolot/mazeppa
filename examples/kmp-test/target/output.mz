@@ -2,38 +2,30 @@ main(s) := f0(s);
 
 f0(s) :=
     match s {
-    Cons(s', ss) ->
-    match =(97u8, s') {
-    F() -> f1(ss),
-    T() -> f2(ss)
-    },
+    Cons(s', ss) -> f1(s', ss),
     Nil() -> F()
     };
 
-f1(ss) := f0(ss);
-
-f2(ss) :=
-    match ss {
-    Cons(s, ss') ->
+f1(s, ss) :=
     match =(97u8, s) {
-    F() -> f1(ss'),
-    T() -> f4(ss')
-    },
+    F() -> f0(ss),
+    T() ->
+    match ss {
+    Cons(s', ss') -> f2(s', ss'),
     Nil() -> F()
+    }
     };
 
-f3(ss) := f2(ss);
-
-f4(ss) :=
-    match ss {
-    Cons(s, ss') ->
-    match =(98u8, s) {
-    F() ->
+f2(s, ss) :=
     match =(97u8, s) {
-    F() -> f1(ss'),
-    T() -> f4(ss')
-    },
+    F() -> f1(s, ss),
+    T() ->
+    match ss {
+    Cons(s', ss') ->
+    match =(98u8, s') {
+    F() -> f2(s', ss'),
     T() -> T()
     },
     Nil() -> F()
+    }
     };

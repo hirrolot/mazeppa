@@ -84,7 +84,7 @@ let classify : t -> category =
       | Call (op, args) -> go_call (Symbol.op_kind op, args)
     and go_call = function
       | `CCall, _args -> Trivial
-      | `GCall, Var _ :: _args -> Global
+      | `GCall, scrutinee :: _args when is_neutral scrutinee -> Global
       | (`FCall | `GCall), args -> go_args args
     and go_args = function
       | [] -> Local

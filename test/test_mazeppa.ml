@@ -77,12 +77,27 @@ let classify () =
     check ~expected:T.Trivial (T.string "hello world");
     check ~expected:T.Trivial T.(call ("Foo", [ call ("f", []); call ("g", []) ]));
     check ~expected:T.Global T.(call (".g", [ var "x"; call ("f", []) ]));
+    check
+      ~expected:T.Global
+      T.(call (".g", [ call ("+", [ var "x"; var "y" ]); var "z" ]));
+    check
+      ~expected:T.Global
+      T.(call (".g", [ call ("mz_ffi_f", [ int (u8 42) ]); var "y" ]));
     [ ".g1"; "f" ]
     |> List.iter (fun op ->
       let args = T.[ call (".g2", [ var "x" ]); var "y"; call ("f", []) ] in
       check ~expected:T.Global (T.call (op, args));
       check ~expected:T.Global (T.call (op, List.rev args)));
-    check ~expected:T.Local T.(call ("f", [ call ("g", []); var "x"; var "y" ]))
+    check
+      ~expected:T.Local
+      T.(
+        call
+          ( "f"
+          , [ call (".g", [ call ("f'", []) ])
+            ; var "x"
+            ; int (u8 42)
+            ; string "hello world"
+            ] ))
 ;;
 
 let term_classification_cases = [ "Tests", classify ]
