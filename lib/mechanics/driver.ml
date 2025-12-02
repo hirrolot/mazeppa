@@ -55,11 +55,8 @@ let unify ~x ~contraction:{ c; fresh_vars; source_vars = _ } list =
 
 let symbol = Symbol.of_string
 
-let invalid_arg_list ~op args =
-    Util.panic
-      "Unexpected argument list for %s: %s"
-      (Symbol.verbatim op)
-      (args |> List.map Term.verbatim |> String.concat ",")
+let panic fmt =
+    Format.ksprintf (fun msg -> Decompose (symbol "Panic", [ Term.string msg ])) fmt
 ;;
 
 let view_g_rules ~program g =
@@ -247,12 +244,16 @@ struct
     | `FCall, [ t ] when Symbol.is_op1 op -> step_of_term (Simplifier.handle_op1 ~op t)
     | `FCall, [ t1; t2 ] when Symbol.is_op2 op ->
       step_of_term (Simplifier.handle_op2 ~op (t1, t2))
-    | `FCall, args when Symbol.is_primitive_op op -> invalid_arg_list ~op args
+    | `FCall, args when Symbol.is_primitive_op op ->
+      let comma_sep_args = args |> List.map Term.verbatim |> String.concat "," in
+      panic "unexpected argument list for %s: %s" (Symbol.verbatim op) comma_sep_args
     | `FCall, args when Symbol.is_foreign_function op -> Decompose (op, args)
     | `FCall, args ->
       let params, body = Program.find_f_rule ~program op in
       Unfold (simplify_body ~params ~args body)
-    | `GCall, (([] | Term.Const _ :: _) as args) -> invalid_arg_list ~op args
+    | `GCall, [] -> panic "no scrutinee available"
+    | `GCall, (Term.Const _ as scrutinee) :: _args ->
+      panic "ill-formed scrutinee %s" (Term.verbatim scrutinee)
     | `GCall, Term.Var x :: args ->
       Analyze (x, Term.Var x, unfold_g_rules ~depth ~x:(Some x) ~args op)
     | `GCall, Term.Call (op', args') :: args ->
@@ -261,8 +262,10 @@ struct
   (* Reduces a g-function call where the first argument is also a call. *)
   and reduce_g_call ~depth ~op = function
     | `CCall, (c, c_args), args ->
-      let c_params, params, body = Program.find_g_rule ~program (op, c) in
-      Unfold (simplify_body ~params:(c_params @ params) ~args:(c_args @ args) body)
+      (match Program.find_g_rule ~program (op, c) with
+       | Some (c_params, params, body) ->
+         Unfold (simplify_body ~params:(c_params @ params) ~args:(c_args @ args) body)
+       | None -> panic "no such pattern %s" (Symbol.verbatim c))
     | _, (op', Term.(([ Var x; t ] | [ t; Var x ]) as args')), args
       when op' = symbol "=" || op' = symbol "!=" ->
       let scrutinee = Term.Call (op', args') in

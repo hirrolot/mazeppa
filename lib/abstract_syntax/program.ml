@@ -41,10 +41,8 @@ let find_productive_g_rule_list ~program op : bool list =
     | Not_found -> Util.panic "No such g-function %s" (Symbol.verbatim op)
 ;;
 
-let find_g_rule ~program (op, c) : g_rule =
-    try Symbol_map.find c (find_g_rule_list ~program op) with
-    | Not_found ->
-      Util.panic "No such pattern %s for %s" (Symbol.verbatim c) (Symbol.verbatim op)
+let find_g_rule ~program (op, c) : g_rule option =
+    Symbol_map.find_opt c (find_g_rule_list ~program op)
 ;;
 
 let output ~oc ({ f_rules; g_rules; _ } : t) =

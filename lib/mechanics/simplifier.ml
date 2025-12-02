@@ -8,13 +8,6 @@ open Checked_oint
 
 let symbol = Symbol.of_string
 
-let invalid_arg_list ~op args =
-    Util.panic
-      "Unexpected argument list for %s: %s"
-      (Symbol.verbatim op)
-      (args |> List.map Term.verbatim |> String.concat ",")
-;;
-
 let to_int (n : Checked_oint.generic) : int =
     let (module Singleton) = Checked_oint.singleton n in
     let repr : string = Singleton.(to_string value) in
@@ -45,7 +38,7 @@ let do_int_op1 ~op (module S : Checked_oint.Singleton) =
       | "i32" -> cast Int_ty.i32
       | "i64" -> cast Int_ty.i64
       | "i128" -> cast Int_ty.i128
-      | _ -> Util.panic "Unexpected integer unary operator: %s" (Symbol.verbatim op)
+      | _ -> panic "unexpected integer unary operator: %s" (Symbol.verbatim op)
     with
     | Checked_oint.Out_of_range ->
       panic
@@ -75,7 +68,7 @@ let do_int_op2 ~op (module S : Checked_oint.Pair) =
       | ">=" -> S.compare m n >= 0 |> of_bool
       | "<" -> S.compare m n < 0 |> of_bool
       | "<=" -> S.compare m n <= 0 |> of_bool
-      | _ -> Util.panic "Unexpected integer binary operator: %s" (Symbol.verbatim op)
+      | _ -> panic "unexpected integer binary operator: %s" (Symbol.verbatim op)
     with
     | Checked_oint.Out_of_range ->
       panic
@@ -91,7 +84,7 @@ let do_string_op1 ~op s =
       let n = U64.of_int_exn (String.length s) in
       int (U64 n)
     | "string" -> string s
-    | _ -> Util.panic "Unexpected string unary operator: %s" (Symbol.verbatim op)
+    | _ -> panic "unexpected string unary operator: %s" (Symbol.verbatim op)
 ;;
 
 let do_string_op2 ~op (s1, s2) =
@@ -103,7 +96,7 @@ let do_string_op2 ~op (s1, s2) =
     | "<" -> s1 < s2 |> of_bool
     | "<=" -> s1 <= s2 |> of_bool
     | "++" -> string (s1 ^ s2)
-    | _ -> Util.panic "Unexpected string binary operator: %s" (Symbol.verbatim op)
+    | _ -> panic "unexpected string binary operator: %s" (Symbol.verbatim op)
 ;;
 
 (* In the simplification rules below, we restrict neutral operands to variables only. The
@@ -143,7 +136,12 @@ let handle_op2 ~(op : Symbol.t) : t * t -> t = function
   | (Const (Const.Int m) as t1), (Const (Const.Int n) as t2) ->
     (match Checked_oint.pair (m, n) with
      | Some (module Pair) -> do_int_op2 ~op (module Pair)
-     | None -> invalid_arg_list ~op [ t1; t2 ])
+     | None ->
+       panic
+         "unexpected argument list for %s: %s, %s"
+         (Symbol.verbatim op)
+         (Term.verbatim t1)
+         (Term.verbatim t2))
   | Const (Const.String s1), Const (Const.String s2) -> do_string_op2 ~op (s1, s2)
   | Const (Const.String s), Const (Const.Int (U64 idx)) when op = symbol "get" ->
     let idx = to_int (U64 idx) in

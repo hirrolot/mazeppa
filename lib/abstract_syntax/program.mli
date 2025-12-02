@@ -36,6 +36,6 @@ val find_g_rule_list : program:t -> Symbol.t -> g_rules_by_pattern
 
 val find_productive_g_rule_list : program:t -> Symbol.t -> bool list
 
-val find_g_rule : program:t -> Symbol.t * Symbol.t -> g_rule
+val find_g_rule : program:t -> Symbol.t * Symbol.t -> g_rule option
 
 val output : oc:out_channel Lazy.t -> t -> unit

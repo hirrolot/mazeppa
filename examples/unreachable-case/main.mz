@@ -1,0 +1,12 @@
+main() := g(0u64, Unreachable());
+
+f(x) := match x {
+    Stop() -> Done()
+};
+
+g(i, r) :=
+    let limit := call "mz_ffi_limit" ();
+    match >(i, limit) {
+        T() -> f(r),
+        F() -> g(+(i, 1u64), Stop())
+    };

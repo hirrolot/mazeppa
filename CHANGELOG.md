@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - Check integers according to their bit lengths for more predictable supercompilation (issue https://github.com/hirrolot/mazeppa/issues/32).
  - Enhance horizontal configuration analysis by checking calls that match on all neutrals, not just variables (issue https://github.com/hirrolot/mazeppa/issues/33).
+ - Emit run-time panics on invalid program states instead of failing (issue https://github.com/hirrolot/mazeppa/issues/34).
  - Implement a more reasonable pretty-printer for output code.
  - Only require `bisect_ppx` and `alcotest` for testing, not for production builds.
 
