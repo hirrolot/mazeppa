@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
  - Properly special-case pretty printing of FFI calls: `call "mz_ffi_xxx" (...)`.
+ - A non-termination scenario of endless whistling and splitting (issue https://github.com/hirrolot/mazeppa/issues/36).
 
 ## 0.7.0 - 2025-11-22
 

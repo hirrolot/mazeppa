@@ -82,6 +82,8 @@ end = struct
     | _ -> false
   ;;
 
+  let failback ~m_id action = raise_notrace (Failback (m_id, action))
+
   let extract t =
       let x = Gensym.emit var_gensym in
       raise_notrace (Extract ((x, t), Term.Var x))
@@ -159,43 +161,58 @@ end = struct
       | _ -> check_whistle ~history (n_id, n)
 
   (* If some ancestor node [m] is homeomorphically embedded into [n], do something with
-     either [m] or [n]. Otherwise, drive [n].
-
-     When the whistle blows, we must ensure that we break terms into structurally smaller
-     components. For splitting, it means that we break calls with at least one argument
-     that is not a variable. Consider that [m] is embedded into [n] either by coupling or
-     diving. If [g] is a variable, [m] must be embedded by diving (because the uppermost
-     operators are different), so at least one argument in [n] is not a variable. If [g]
-     is not a variable, [m] is embedded by coupling, but after we check that [m] is not a
-     safe instance of [n], we are sure that there is at least one argument in [n] that is
-     not variable, so splitting [n] is again permitted.
-
-     Before generalizing/splitting [m] at any point, we must check that doing so for [m]
-     also makes it smaller; otherwise, we split [n]. Finally, before folding/generalizing
-     any node, we must check that the suggested substitution is safe, so as to preserve
-     call-by-value semantics of code. *)
+     either [m] or [n] to ensure eventual termination of the algorithm. Otherwise, drive
+     [n]. Before folding or generalizing any node, we must check that the computed
+     substitution is "safe", so as to preserve the call-by-value semantics of code:
+     preserving the existence (and order) of panics, foreign function calls, and
+     non-termination. *)
   and check_whistle ~history (n_id, n) =
       match History_inst.memoize ~suspect:(n_id, n) history with
       | Some (m_id, m), history ->
         (match Term.match_against (m, n) with
+         (* Fold: [n] is an instance of [m] through [subst], meaning that [subst] applied
+            to [m] yields us [n]. This is the only case we fold, thereby issuing an
+            upwards-directed pointer in the process graph, which will become a function
+            call during residualization. The substitution must be safe, because in the
+            residualized code, it will appear as an argument vector, which would make
+            unsafe arguments evaluated too eagerly. *)
          | Some subst when Subst.is_safe subst -> fold ~history ~bindings:subst m_id
          | _ ->
            let g, subst_1, _subst_2 = Msg.compute ~gensym:var_gensym (m, n) in
            (match g with
-            (* Split: there is no meaningful generalization of [m] and [n]. *)
+            (* Split: there is no meaningful generalization of [m] and [n]. Since there is
+               no common outer constructor in [m] and [n], [m] must be embedded into [n]
+               by diving, making it impossible that [n] is a call with all arguments
+               variables. Therefore, splitting [n] will necessarily make it smaller,
+               ensuring that we make progress. *)
             | Term.Var _ -> split ~history n
-            (* Split: [g] is simply a renaming of [m]. *)
-            | _ when Subst.is_renaming subst_1 -> split ~history n
-            (* Split: there is a danger of removing some loops and panics. *)
-            | _ when not (Subst.is_safe subst_1) ->
-              (match m with
-               (* Splitting [m] would not make it smaller, so split [n] instead. *)
+            (* Multiple choices: [g] renames to [m]. *)
+            | _ when Subst.is_renaming subst_1 ->
+              (match n with
                | Term.Call (_op, args) when List.for_all Term.is_var args ->
-                 split ~history n
-               (* Split upwards to optimize residual program size. *)
-               | _ -> raise_notrace (Failback (m_id, `Split)))
+                 (match m with
+                  (* We are in a peculiar situation: both [m] and [n] are calls with all
+                     arguments variables. A concrete example of this situation would be
+                     [m] defined as [f(s, s)] and [n] defined as [f(x, y)], whose MSG [g]
+                     would be [f(v1, v2)]. Notice that [n] is not an instance of [m], so
+                     folding is not possible. What should we do? Our decision is to
+                     generalize [m], so as to prohibit this type of situation in the
+                     future: if we ever encounter a call to [f] with all arguments
+                     variables, it will constitute a renaming of [g], thereby allowing
+                     ourselves to fold as usual. *)
+                  | Term.Call (_op', args') when List.for_all Term.is_var args' ->
+                    failback ~m_id (`Generalize (subst_1, g))
+                  | _ -> failback ~m_id `Split)
+               | _ -> split ~history n)
+            (* Split: [subst_1] is not safe, making generalization of [m] problematic. We
+               proceed by splitting [m] because, since [subst_1] is not a safe
+               substitution, it must contain at least one function call; and since [m] can
+               be obtained through [g] by [subst_1], then this function call must be
+               somewhere in [m] in argument position, ruling out the possibility that [m]
+               is a call with all arguments values. *)
+            | _ when not (Subst.is_safe subst_1) -> failback ~m_id `Split
             (* Perform upwards generalization otherwise. *)
-            | _ -> raise_notrace (Failback (m_id, `Generalize (subst_1, g)))))
+            | _ -> failback ~m_id (`Generalize (subst_1, g))))
       | None, history -> Step (Driver_inst.run ~f:(run ~history) n)
 
   and supercompile_bindings ~history subst =
