@@ -31,11 +31,11 @@ let compute_metadata (graph : t) : metadata =
         go graph;
         variants
         |> List.iter (fun (Driver.{ c = _; fresh_vars; source_vars }, (binding, graph)) ->
-          fresh_vars
+          source_vars
           |> List.iter2
                (fun x y ->
                   fresh_to_source_vars := Symbol_map.add x y !fresh_to_source_vars)
-               source_vars;
+               fresh_vars;
           match binding with
           | Some binding -> go_extract (binding, graph)
           | None -> go graph)
