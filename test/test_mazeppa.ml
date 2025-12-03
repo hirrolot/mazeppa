@@ -287,26 +287,10 @@ let he () =
     check
       ~expected:false
       T.(call ("f", [ var "x"; int (u8 10); string "hello world" ]), call ("f", []));
-    (* Small integers embed only if they are equal; larger integers embed based on
-       bit-length comparison. *)
-    let signed_bit_length n =
-        if n = 0
-        then 0
-        else (
-          let v = if n < 0 then lnot n else n in
-          let rec count acc v = if v = 0 then acc else count (acc + 1) (v lsr 1) in
-          count 0 v + 1)
-    in
-    let small_int_threshold = 4 in
+    (* Integers of the same type are embedded in each other structurally. *)
     for i = -100 to 100 do
       for j = -100 to 100 do
-        let bi, bj = signed_bit_length i, signed_bit_length j in
-        let expected =
-            if bi <= small_int_threshold && bj <= small_int_threshold
-            then i = j
-            else bi <= bj
-        in
-        check ~expected T.(int (i32 i), int (i32 j))
+        check ~expected:(i <= j) T.(int (i32 i), int (i32 j))
       done
     done;
     (* Integers of distinct types cannot embed into each other -- even if they have the
@@ -333,7 +317,11 @@ let he () =
     incomparable_terms
     |> List.iteri (fun i const ->
       incomparable_terms
-      |> List.iteri (fun j const' -> if i <> j then check ~expected:false (const, const')))
+      |> List.iteri (fun j const' ->
+        if i <> j
+        then
+          (* Incomparable terms have different outer constructors. *)
+          check ~expected:false (const, const')))
 ;;
 
 let he_cases = [ "Tests", he ]

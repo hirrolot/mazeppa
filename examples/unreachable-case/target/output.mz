@@ -1,67 +1,11 @@
 main() :=
     match >(0u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(1u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(2u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(3u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(4u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(5u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(6u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(7u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(8u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(9u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(10u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(11u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(12u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(13u64, call "mz_ffi_limit" ()) {
-    F() ->
-    match >(14u64, call "mz_ffi_limit" ()) {
-    F() -> f0(15u64, call "mz_ffi_limit" ()),
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
-    T() -> Done()
-    },
+    F() -> f0(call "mz_ffi_limit" (), 1u64),
     T() -> Panic("no such pattern `Unreachable`")
     };
 
 f0(v0, v1) :=
-    match >(v0, v1) {
-    F() -> f0(+(v0, 1u64), call "mz_ffi_limit" ()),
+    match >(v1, v0) {
+    F() -> f0(call "mz_ffi_limit" (), +(v1, 1u64)),
     T() -> Done()
     };
