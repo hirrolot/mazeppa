@@ -1,3 +1,4 @@
+// See <https://github.com/hirrolot/mazeppa/issues/36>.
 main(n) := f(0u64, 0u64, n);
 
 f(i, j, n) := match =(j, n) {
