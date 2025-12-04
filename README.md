@@ -1,7 +1,7 @@
 # Mazeppa
 [![CI](https://github.com/hirrolot/mazeppa/workflows/OCaml%20CI/badge.svg)](https://github.com/hirrolot/mazeppa/actions)
 
-Supercompilation [^turchin-concept] is a deep program transformation technique that symbolically evaluates a given program, with run-time values as unknowns. In doing so, it discovers execution patterns of the original program and synthesizes them into standalone functions; the result is a more efficient residual program. In terms of transformational power, supercompilation subsumes both deforestation [^deforestation] and partial evaluation [^partial-evaluation], and even exhibits certain capabilities of theorem proving.
+Supercompilation [^turchin-concept] is a deep program transformation technique that symbolically evaluates a given program, with run-time values as unknowns. In doing so, it discovers execution patterns of the program and synthesizes them into standalone functions; the result is a more efficient residual program. In terms of transformational power, supercompilation subsumes both deforestation [^deforestation] and partial evaluation [^partial-evaluation], and even exhibits certain capabilities of automated theorem proving.
 
 _Mazeppa_ is a modern supercompiler intended to be a compilation target for call-by-value functional languages. Having prior supercompilers diligently compared and revised, Mazeppa
   - Provides the full set of primitive data types for efficient computation.
@@ -60,7 +60,6 @@ $ ocamlopt -config | grep flambda
 ## Hacking
 
 You can play with Mazeppa without actually installing it. Having OCaml installed and the repository cloned (as above), run the following command from the root directory:
-
 
 ```
 $ ./scripts/play.sh
@@ -200,7 +199,7 @@ powerSq(a, x) := match =(x, 0u8) {
 square(a) := *(a, a);
 ```
 
-`powerSq` implements the famous [exponentiation-by-squaring] algorithm. The original program is inefficient: it recursively examines the `x` parameter of `powerSq`, although it is perfectly known at compile-time. Running Mazeppa on `main(a)` will yield the following residual program:
+`powerSq` implements the well-known [exponentiation-by-squaring] algorithm. The source program is inefficient: `powerSq` recursively examines its parameter `x`, although in our case it is explicitly set to the constant `7u8` up in `main`. Running Mazeppa on `main(a)` will yield the following residual program:
 
 [exponentiation-by-squaring]: https://en.wikipedia.org/wiki/Exponentiation_by_squaring
 
@@ -215,7 +214,7 @@ The whole `powerSq` function has been eliminated, thus achieving the effect of p
 
 ## Synthesizing the KMP algorithm
 
-Let us go beyond deforestation and partial evaluation. Consider a function `matches(p, s)` of two strings, which returns `T()` if `s` contains `p` and `F()` otherwise. The naive implementation in Mazeppa would be the following, where `p` is specialized to `"aab"`:
+Let us go beyond deforestation and partial evaluation. Consider a function `matches(p, s)` of two strings `p` and `s`, which returns `T()` if `s` contains `p` and `F()` otherwise. The naive implementation in Mazeppa would be the following, where `p` is specialized to `"aab"` represented as a list of characters:
 
 [[`examples/kmp-test/main.mz`](examples/kmp-test/main.mz)]
 ```
@@ -287,7 +286,7 @@ f2(s, ss) :=
 
 The naive algorithm that we wrote has been automatically transformed into a well-known efficient version! While the naive algorithm has complexity _O(|p| * |s|)_, the specialized one is _O(|s|)_.
 
-Synthesizing KMP is a standard example that showcases the power of supercompilation with respect to other techniques (e.g., see [^perfect-process-tree] and [^positive-supercomp]). Obtaining KMP by partial evaluation is not possible without changing the definition of `matches` [^partial-evaluation-matches-1] [^partial-evaluation-matches-2].
+Synthesizing KMP is a standard example that showcases the transformational power of supercompilation with respect to other techniques [^perfect-process-tree] [^positive-supercomp]. Obtaining the optimized algorithm either by partial evaluation or deforestation is not possible without changing the source definition of `matches` in a particular way [^partial-evaluation-matches-1] [^partial-evaluation-matches-2].
 
 ## Metasystem transition
 
@@ -298,7 +297,7 @@ Synthesizing KMP is a standard example that showcases the power of supercompilat
 
 > Consider a system _S_ of any kind. Suppose that there is a way to make some number of copies from it, possibly with variations. Suppose that these systems are united into a new system _S'_ which has the systems of the _S_ type as its subsystems, and includes also an additional mechanism which controls the behavior and production of the _S_-subsystems. Then we call _S'_ a metasystem with respect to _S_, and the creation of _S'_ a metasystem transition. As a result of consecutive metasystem transitions a multilevel structure of control arises, which allows complicated forms of behavior.
 
-Thus, supercompilation can be readily seen as a metasystem transition: there is an object program in Mazeppa, and there is the Mazeppa supercompiler which controls and supervises execution of the object program. However, we can go further and perform any number of metasystem transitions within the realm of the object program itself, as the next example demonstrates.
+Thus, supercompilation can be readily seen as a particular type of metasystem transition: having an object program, the supercompiler controls and supervises it. However, we can go further and perform _any_ number of metasystem transitions within the realm of the object program itself, as the next example demonstrates.
 
 We will be using the code from [`examples/lambda-calculus/`](examples/lambda-calculus/). Below is a standard [normalization-by-evaluation] procedure for obtaining beta normal forms of untyped lambda calculus terms:
 
@@ -433,9 +432,9 @@ analyze(x, m, n) := match x {
 };
 ```
 
-There are two things wrong with this perfectly correct code: 1) the supercompiler will expand the formula in exponential space, and 2) the supercompiler will try to solve the expanded formula in exponential time. Sometimes, we just do not want to evaluate everything at compile-time.
+There are two things wrong with this perfectly correct code: 1) the supercompiler will expand the formula in exponential space, and 2) the supercompiler will try to solve the expanded formula in exponential time. Sometimes, we just do not want to take supercompilation too literally and evaluate everything at compile-time.
 
-However, despair not: we provide a solution for this problem. Let us first consider how to postpone solving the formula until run-time. It turns out that the only thing we need to do is to annotate the function `formula` with `@extract` as follows:
+However, despair not: we provide a partial solution to this problem. Let us first consider how to postpone solving the formula until run-time, to prevent the supercompiler from acting as a solver. It turns out that the only thing we need to change is to annotate the function `formula` with `@extract` as follows:
 
 ```
 @extract
@@ -443,9 +442,9 @@ formula(a, b, c, d, e, f, g) :=
     // Everything is the same.
 ```
 
-When Mazeppa sees `solve(formula(a, b, c, d, e, f, g))`, it extracts the call to `formula` into a fresh variable `.v0` and proceeds supercompiling the extracted call and `solve(.v0)` in isolation. The latter call will just reproduce the original SAT solver.
+When Mazeppa sees `solve(formula(a, b, c, d, e, f, g))`, it extracts the call to `formula` to a fresh variable `.v0` and supercompiles the extracted call and `solve(.v0)` in isolation; the latter call will merely reproduce the original definition of `solve` modulo variable naming, inasmuch as there is nothing specific in `.v0` to consider for optimization.
 
-But supercompiling the call to `formula` will still result in an exponential blowup. Let us examine why this happens. Our original formula only consists of calls to `or` and `and`; while the definition of `or` does not look too dangerous, `and` propagates the potentially massive `rest` parameter to _both_ branches of the generated `If` expression, thus triggering the blowup as time goes on. So let us proceed and mark `and` with `@extract` as well:
+However, supercompiling the call to `formula` will still result in an exponential blowup. Let us examine why this happens. Our original formula only consists of calls to `or` and `and`; while the definition of `or` does not look too dangerous, `and` propagates the potentially massive `rest` parameter to _both_ branches of the generated `If` expression, thus triggering the blowup as time goes on. So let us proceed and mark `and` with `@extract` as well:
 
 ```
 @extract
@@ -456,13 +455,9 @@ and(clause, rest) := match clause {
 
 That is it! When `and` is to be transformed, Mazeppa will immediately extract the call out of its surrounding context and supercompile it in isolation. By adding two annotations at appropriate places, we have solved both the problem of code blowup and exponential running time of supercompilation. In general, whenever Mazeppa sees `ctx[f(t1, ..., tN)]`, where `f` is marked `@extract` and `ctx[.]` is a non-empty surrounding context with `.` in a _redex position_, it will plug a fresh variable `v` into `ctx` and proceed transforming the following nodes separately: `f(t1, ..., tN)` and `ctx[v]`.
 
-Finally, note that `@extract` is only a low-level mechanism; a compiler front-end must carry out additional machinery to tell Mazeppa which functions to extract. This can be done in two ways:
- - By static analysis of your object language. For instance, parameter linearity analysis would mark both `formula` and `and` as extractable, leaving all other functions untouched.
- - By source code annotations, in a manner similar to [staged compilation].
+Of course, `@extract` is only a partial solution to the general problem of unpredictability: ultimately, these annotations need to be injected either by a frontend or human being. Having thought about and experimented a lot with this problem, our current intuition is that there is a whole missing theory of how to differentiate between supercompiling a program with a real potential for optimization, such as a metasystem stairway, and supercompiling a program that just causes the supercompiler to analyze an unreasonably huge space of execution states without doing any "meaningful" work. Existing approaches such as [^supercomp-code-explosion] employ savings calculation to speculatively determine whether it is more beneficial to supercompile the expression in whole or in parts, which unfortunately prohibits any interesting metasystem transitions from being optimized away.
 
-[staged compilation]: https://okmij.org/ftp/ML/MetaOCaml.html
-
-Both methods can be combined to achieve a desired effect.
+For now, let us conclude that it is better to have `@extract` annotations than not to have them, but for supercompilation to have practical relevance, we need a more intelligent solution.
 
 ## Lazy evaluation
 
@@ -797,42 +792,44 @@ See [`test-c-codegen/ffi/`](test-c-codegen/ffi/).
 
 Mazeppa employs several interesting design choices (ranked by importance):
 
- - **First-order code.** Max Bolingbroke and Simon Peyton Jones [^supercomp-by-eval] report that for one particular example, their higher-order supercompiler for a subset of Haskell spent 42% of execution time on managing names and renaming. While it is true that simplistic evaluation models, such as normalization of lambda terms, permit us to avoid significant overhead of capture avoidance, supercompilation is more complicated. For instance, besides doing symbolic computation, supercompilation needs to analyze previously computed results to make informed decisions about further transformation: consider term instance tests, homeomorphic embedding tests, most specific generalizations, etc. Introducing higher-order functions inevitably complicates all these analyses, making supercompilation slower, more memory-consuming, and harder to reason about. In Mazeppa, we stick with the philosophy of gradual improvements: instead of trying to handle many fancy features at the same time, we 1) fix the _core_ language for convenient manipulation by a machine, 2) perform as many metasystem transitions as necessary to make the core language better for human.
+ - **First-order code.** Max Bolingbroke and Simon Peyton Jones [^supercomp-by-eval] report that for one example, their higher-order supercompiler for a subset of Haskell spent 42% of execution time on managing names and renaming. While it is true that simplistic evaluation models, such as normalization of lambda terms, permit us to avoid significant overhead of capture avoidance, supercompilation is more complicated. For instance, besides doing symbolic computation, supercompilation needs to analyze previously computed results to make informed decisions about further transformation: consider term instance tests, homeomorphic embedding tests, most specific generalizations, etc. Introducing higher-order functions inevitably complicates all these analyses, making supercompilation slower, more memory-consuming, and harder to reason about. In Mazeppa, we stick with the philosophy of gradual improvements: instead of trying to handle many fancy features at the same time, we 1) fix the _core_ language for convenient manipulation by a machine, 2) perform as many metasystem transitions as necessary to make the core language better for human.
 
- - **Lazy constructors.** It is a well-known observation that call-by-value languages are hard for proper deforestation. It is still possible to deforest them, but not without additional analysis [^CbV-supercomp] [^CbV-supercomp-next]. However, if constructors are lazy (i.e., they do not evaluate their arguments), deforestation _just works_. Turchin made it work by normal-order transformation of a call-by-value language, but the result is that residual code may terminate more often. In Mazeppa, we have call-by-value functions and call-by-name (call-by-need) constructors, which 1) makes deforestation possible and 2) preserves the original semantics of code.
+ - **Lazy constructors.** It is a well-known observation that call-by-value languages are not very amenable to deforestation -- additional analyses [^CbV-supercomp] [^CbV-supercomp-next] are required. However, if constructors do not evaluate their arguments, deforestation _just works_. Turchin made it work by normal-order transformation of a call-by-value language, but the result is that residual code may terminate more often. In Mazeppa, we have call-by-value functions and call-by-name (call-by-need) constructors, which 1) makes deforestation possible and 2) preserves the original semantics of code.
    - Incidentally, lazy constructors are also adopted by eager functional languages outside of supercompilation. See [_"Why is Idris 2 so much faster than Idris 1?"_](https://www.type-driven.org.uk/edwinb/why-is-idris-2-so-much-faster-than-idris-1.html) and _"CONS Should Not Evaluate its Arguments"_ [^cons-lazy-alloc].
 
- - **Term-free process graphs.** In Mazeppa, process graphs do not contain any references to terms: residualization can work without them. As a result, the garbage collector can deallocate terms that were used during construction of a subgraph. In addition ot that, this policy has several other important advantages: 1) the graph is still there for inspection with `--inspect`, 2) when it is drawn, it only reveals information about the _decisions_ the supercompiler has taken, which makes it much easier to look at. Several existing supercompilers refrain from proper process graphs (e.g., Neil Mitchell's Supero [^mitchell-supero] and the aforementioned [^supercomp-by-eval]), but as a result, 1) they are less capable of inspection by a user, 2) the algorithms become cluttered with code generation details.
+ - **Term-free process graphs.** In Mazeppa, process graphs do not contain any references to supervised terms: residualization can work without them. As a result, OCaml's garbage collector can eagerly deallocate terms that were used during construction of a subgraph. In addition ot that, this policy has several other important advantages: 1) the graph structure is still available for inspection with `--inspect`, 2) when it is drawn, it only reveals information about the _decisions_ the supercompiler has taken, which makes it much easier analyze by a human being. Several existing supercompilers refrain from full-fledged process graphs as well (e.g., Neil Mitchell's Supero [^mitchell-supero] and the aforementioned [^supercomp-by-eval]), but as a result, 1) they are less capable of inspection by a user, 2) the algorithms become cluttered with code generation details.
 
- - **Two-dimensional configuration analysis.** Usually a supercompiler keeps a "history" of a subset of all ancestors while transforming a node; if this node is "close enough" to one of its ancestors, it is time to break the term into smaller parts to guarantee termination. In Mazeppa, we keep two separate data structures instead: the one containing a subset of node's ancestors and the one containing a subset of fully transformed nodes. The former data structure is used to guarantee termination (as usual), while the latter is used to enhance _sharing of functions_ in residual code. Specifically, if the current node (of special kind) is a renaming of some previously transformed node, we fold the current node into this previous node. This way, Mazeppa performs both _vertical_ and _horizontal_ analysis of configurations, which makes residual code more compact and supercompilation more efficient.
+ - **Two-dimensional configuration analysis.** Usually a supercompiler keeps a "history" of a subset of all ancestors while handling a node; if this node is determined to be a version of one of its ancestors, it is good time to break the term into smaller parts to guarantee termination. In Mazeppa, we keep two separate data structures instead: the one containing a subset of all node's ancestors and the one containing a subset of all fully transformed nodes. The former data structure is used to guarantee termination, while the latter is used to enhance _sharing of functions_ in residualized code. Specifically, if the current node is a renaming of some previously transformed node, we fold the current node into this previous node, which will look like a horizontal edge in the process graph. This way, Mazeppa performs both _vertical_ and _horizontal_ analysis of configurations, which makes residual code more compact and supercompilation more efficient.
 
- - **Function productivity analysis.** When an inner function call pattern-matches an unknown value, two potentially dangerous things happen: 1) supercompilation reproduces the structure of the pattern-matching function, 2) supercompilation pushes the whole surrounding context to all branches of this function. Without further control, this situation can lead to significant explosion in code size, sometimes even causing a supercompiler not to terminate in a reasonable amount of time. To ameliorate, Mazeppa duplicates the context iff this inner call produces a _definite top-level value_ from _at least one_ exit point, because if it does, great chances that this value can be deconstructed by subsequent pattern matching. Otherwise, Mazeppa extracts the inner call and transforms it in isolation (just as if it was marked with `@extract`). Furthermore, if the context is actually duplicated, the following rule applies to all branches: if the branch produces a definite top-level value from _all_ exit points, it is transformed in the context as usual; otherwise, the branch is extracted from the context and transformed in isolation. In practice, this analysis prevents a huge amount of unneeded specializations, thereby compactifying residual program size and making supercompilation much more tractable.
-   - We perform productivity analysis strictly _before_ supercompilation. The algorithm launches global analysis for all f- and g-rules present in Mazeppa IR, and has linear time complexity.
-   - An emergent effect is that after extracting these pattern-matching calls, horizontal configuration analysis becomes able to fold more repeated computations.
+ - **Function productivity analysis.** When an inner function call pattern-matches an unknown value, two dangerous situations happen at the same time: 1) supercompilation reproduces the exact structure of the pattern-matching function, 2) supercompilation pushes the whole surrounding context to all the branches of this function. Without further control, this situation can lead to significant explosion in code size, sometimes even causing a supercompiler not to terminate in a reasonable amount of time. To ameliorate, Mazeppa duplicates the context iff this inner call produces a _definite top-level value_ from _at least one_ exit point, because if it does, great chances that this value can be deconstructed by subsequent pattern matching. Otherwise, Mazeppa extracts the inner call and transforms it in isolation -- just as if it was manually marked with `@extract`. Furthermore, if the context is actually duplicated, the following rule applies to all the branches: if the branch produces a definite top-level value from _all_ exit points, it is transformed in the context as usual; otherwise, the branch is extracted from the context and transformed in isolation. In practice, this analysis prevents a huge amount of pointless specializations, thereby compactifying residual program size and making supercompilation much more predictable.
+   - We perform productivity analysis strictly _before_ supercompilation takes place. Our algorithm launches a global procedure for all f- and g-rules synthesized from the source program, and has linear time complexity.
+   - An emergent effect is that after extracting all these pattern-matching calls, horizontal configuration analysis is able to fold repeated computations more aggressively.
 
- - **Smart histories.** Instead of blindly comparing a current node with all its ancestors, we employ a more fine-grained control, that is: 1) global nodes (the ones that analyze a neutral value) are compared with global nodes only, 2) local nodes (the ones that reduce linearly in a single step) are compared with local nodes only up to the latest global node, but not including it, and 3) trivial nodes (the ones that break down terms into smaller components) are not compared with anything else. Besides a more economic approach to termination checking, this scheme allows Mazeppa to discover more optimization opportunities; see [^metric-space], sections 4.6 and 4.7. Termination of supercompilation is guaranteed by the fact that homeomorphic embedding is still tested on all potentially infinite subsequences of global and local terms (there cannot exist an infinite sequence of trivial terms only).
+ - **Smart histories.** Instead of blindly comparing a current node to all of its ancestors, we employ a more fine-grained control. Our technique can be described as follows: 1) global nodes (the ones that analyze a neutral value) are compared with global nodes only, 2) local nodes (the ones that reduce linearly in a single step) are compared with local nodes only up to the latest global node, but not including it, and 3) trivial nodes (the ones that break down terms into smaller components) are not compared with anything else. Besides a more economic approach to termination checking, this scheme allows Mazeppa to discover more optimization opportunities; see the examples from [^metric-space], sections 4.6 and 4.7. Termination is guaranteed by the fact that homeomorphic embedding is still tested on all potentially infinite subsequences of global and local configurations, and there cannot exist an infinite sequence of trivial terms only.
 
- - **Redex signatures.** The whistle is only tested on terms with equal _redex signatures_. A redex signature is a pair of 1) a function's symbol and 2) a list of argument _value categories_. A value category is a sort of metainformation about an argument, which can be either 1) `VConst` for such values as `42i32` or `"hello world"`, 2) `VNeutral` for such values as `x` or `+(x, x)`, or 3) `VCCall(c)` for constructor calls such as `Foo(...)`. The whistle is still tested on all potentially infinite sequences of terms, because any infinite sequence must contain at least one infinite subsequence of terms with the same redex signature. This strategy allows Mazeppa to avoid over-generalization in certain cases, as the following two examples demonstrate:
+ - **Redex signatures.** The whistle is only tested on terms with equal _redex signatures_. A redex signature is a pair of 1) a function's symbol and 2) a list of _value categories_ for each argument. A value category is a sort of metainformation about an argument, which can be either 1) `VConst` for such values as `42i32` or `"hello world"`, 2) `VNeutral` for such values as `x` or `+(x, x)`, or 3) `VCCall(c)` for constructor calls such as `Foo(a, b, c)`. The whistle is still tested on all potentially infinite sequences of terms, because any infinite sequence must contain at least one infinite subsequence of terms with the same redex signature. This strategy prevents over-generalization in certain cases, such as:
    - [Redex operators](examples/check-redex-ops/main.mz): during execution, node `f(A())` is homeomorphically embedded into `f(g(B(A())))`; however, since the redex operators are different (`f` and `g`), Mazeppa continues reduction and reaches the ideal result.
    - [Redex signatures](examples/check-redex-sigs/main.mz): although `f(A(Good()))` is embedded into `f(f(f(B(A(Good())))))` and the redex operator is `f` in both cases, Mazeppa does not over-generalize because these two terms have different value categories in their redex signatures: in the first case, `f` is called on `A(...)`, while in the second case, it is called on `B(...)`. Just as in the previous example, Mazeppa reaches the ideal result of supercompilation solely by reduction.
 
- - **Optimized homeomorphic embedding.** Over the decades, homeomorphic embedding has gained reputation for being an excellent method for online termination checking [^homeomorphic-embedding]. Unfortunately, mainly due to the non-linear control flow (when both diving and coupling apply), it can be inexcusably expensive to compute. What is even worse, it is re-executed for all qualifying parent nodes whenever a new term is added to the history, which progressively slows down supercompilation as the history grows: going as far as [eating most] of the supercompilation time! To cope with that, we maintain two separate caches:
+ - **Optimized homeomorphic embedding.** Over the decades, homeomorphic embedding has gained reputation for being an excellent technique for online termination checking of symbolic methods [^homeomorphic-embedding]. Unfortunately, mainly due to the non-linear control flow when coupling and diving apply at the same time, it can be inexcusably expensive to compute. What is even worse, is that it is re-executed for all qualifying parent nodes whenever a new term is added to the history, which progressively slows down supercompilation as the history grows: going as far as [consuming most] of the supercompilation time! To cope with that, we maintain two separate caches that can be described as follows:
    - **Global cache:** an [ephemeron] from term addresses to integers denoting their sizes. Consider two terms, _t1_ and _t2_; if the size of _t1_ is equal to the size of _t2_, _t1_ can only be embedded into _t2_ by coupling. On the other hand, if the size of _t1_ is smaller or equal to the size of _t2_, both diving and coupling may take place. Otherwise, _t1_ is a bigger term which cannot be embedded into _t2_ by no means. Whenever there is a choice to dive or/and couple, we query the cache and decide what to do; this technique can rule out many redundant control flow paths. The idea is borrowed from [^supercomp-code-explosion], section 6.3.
      - Note that deriving the value address is a constant-time [perfect hash function], so the cache penalty should be pretty low. Since it is ephemeral, it also does not induce memory leaks.
    - **Local cache:** a [hash table] from addresses of terms _(t1, t2)_ to booleans denoting results of their comparison. This cache makes homeomorphic embedding to have _O(size(t1) * size(t2))_ worst-case time complexity by not recomputing physically equal terms. Unlike the global cache, the local cache only exists during a single comparison.
 
-[eating most]: https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2260440382
+[consuming most]: https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2260440382
 [ephemeron]: https://ocaml.org/manual/latest/api/Ephemeron.html
 [perfect hash function]: https://en.wikipedia.org/wiki/Perfect_hash_function#Memory_address_identity
 [hash table]: https://ocaml.org/manual/latest/api/Hashtbl.html
 
- - **Hash consing.** The homeomorphic embedding caches described above depend on how many terms are _shared_. We therefore employ hash consing while unfolding function bodies: if some new term _t_ is structurally equal to some existing term _s_, the latter is reused. To avoid memory leaks, we employ a global [ephemeron] holding weak pointers to terms. Besides improved supercompilation times (due to memoization), hash consing also reduces memory consumption -- see https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2282772940.
+ - **Hash consing.** The performance of our homeomorphic embedding caches depends on how many terms are _shared_. We therefore employ hash consing as follows: if the new term _t_ is structurally equal to some existing term _s_, the latter is reused. To avoid memory leaks, we employ a global [ephemeron] holding weak pointers to terms. Besides improved supercompilation times due to memoization, hash consing also [reduces memory consumption].
 
- - **Normalization during unfolding.** When a function call is unfolded, we substitute the parameters and normalize the body as much as possible (i.e., without further unfoldings, to guarantee termination). To see why, consider the factorial function `f(n)`; with simple unfolding, we would trap in an unpleasant situation where `f(1u32)` is embedded into `*(1u32, f(-(1u32, 1u32)))`, causing _over-generalization_. In reality, Mazeppa would unfold `f(1u32)` to `*(1u32, f(0u32))`, making the latter a candidate for further unfolding. This approach was suggested in [^supercomp-code-explosion], section 4.5. Its other merits are: 1) less work for future driving steps, 2) less "banal" computation in process graphs, 3) reduced amount of expensive homeomorphic embedding tests.
-   - Besides folding constants, we also perform algebraic simplification such as _+(t, 0), +(0, t) -> t_, _-(t, 0) -> t_, _*(t, 0), *(0, t) -> 0_, etc. These can be seen as axioms for built-in types.
+[reduces memory consumption]: https://github.com/hirrolot/mazeppa/issues/4#issuecomment-2282772940
+
+ - **Normalization during unfolding.** When a function call is unfolded, we instantiate the parameters and normalize the body as much as possible. To see why, consider the factorial function `f(n)`; with simple unfolding, we would trap in an unpleasant situation where `f(1u32)` is embedded into `*(1u32, f(-(1u32, 1u32)))`, causing over-generalization. In reality, Mazeppa would unfold `f(1u32)` to `*(1u32, f(0u32))`, making the latter a candidate for further unfolding. This approach was suggested in [^supercomp-code-explosion], section 4.5. Its other merits are: 1) less work for future driving steps, 2) less "banal" computation in process graphs, 3) reduced amount of expensive homeomorphic embedding tests.
+   - Besides folding constants, we also perform algebraic simplification such as _+(t, 0), +(0, t) -> t_, _-(t, 0) -> t_, _*(t, 0), *(0, t) -> 0_, etc.
    - After implementing redex signatures, `*(1u32, f(-(1u32, 1u32)))` is no longer checked against `f(1u32)` because of different redex operators. However, other advantages of normalization still hold.
 
- - **Implementation in OCaml.** Mazeppa is implemented using a combination of functional and imperative programming styles, which is very natural to do in OCaml. Exceptions are used not only for "exceptional" situations, mutability inside functions is common. Although we do not have a similar supercompiler written in e.g. Haskell or Rust for comparison, we believe that it is OCaml that gave us a working implementation without having to quarrel with the language and never finishing work.
+ - **Implementation in OCaml.** Mazeppa is implemented in OCaml using a combination of functional and imperative programming styles. Exceptions are used for control flow, mutability inside functions is common. Although we do not have a similar supercompiler written in e.g. Haskell or Rust for comparison, we believe that it is OCaml that gave us a working implementation without having to quarrel with the language and never finishing work.
 
 While most of the above is not particularly novel, we believe that the combination of these features makes Mazeppa a more practical alternative than its predecessors.
 
@@ -840,7 +837,7 @@ While most of the above is not particularly novel, we believe that the combinati
 
 ### Lexical structure
 
-A _symbol_ `<SYMBOL>` is a sequence of letters (`a`, _..._, `z` and `A`, _..._, `Z`) and digits (`0`, _..._, `9`), followed by an optional question mark (`?`), followed by an optional sequence of `'` characters. The underscore character (`_`) may be the first character of a symbol, which may informally indicate that the value or function being defined is not used; otherwise, the first character must be a letter. The following sequences of characters are also permitted as symbols: `~`, `#`, `+`, `-`, `*`, `/`, `%`, `|`, `&`, `^`, `<<`, `>>`, `=`, `!=`, `>`, `>=`, `<`, `<=`, `++`. The following are _reserved words_ that may **not** be used as symbols: `match`, `let`.
+A _symbol_ `<SYMBOL>` is a sequence of letters (`a`, _..._, `z` and `A`, _..._, `Z`) and digits (`0`, _..._, `9`), followed by an optional question mark (`?`), followed by an optional sequence of `'` characters. The underscore character (`_`) may be the first character of a symbol, which may informally indicate that the value or function being defined is not used; otherwise, the first character must be a letter. The following sequences of characters are also permitted as symbols: `~`, `#`, `+`, `-`, `*`, `/`, `%`, `|`, `&`, `^`, `<<`, `>>`, `=`, `!=`, `>`, `>=`, `<`, `<=`, `++`. The following are _reserved words_ that may **not** be used as symbols: `match`, `let`, `call`.
 
 There are four classes of _unsigned integer constants_:
  - Binary: `0b` (`0B`) followed by a non-empty sequence of binary digits `0` and `1`.
@@ -892,30 +889,39 @@ where `<def-attr-list>` is a whitespace-separated sequence of _function attribut
  - `let` `<pattern>` `:=` `<term>` `;` `<term>` (a pattern let-binding)
  - `<COMMENT>` `<term>` (a comment)
 
-The rest of the auxiliary rules are:
-
-`<const>`:
- - Either `<INT>` or `<STRING>` or `<CHAR>`.
-
-`<match-case>`:
- - `<pattern>` `->` `<term>`
-
-`<pattern>`:
- - `<SYMBOL>` `(` `<SYMBOL>`, _..._, `<SYMBOL>` `)`.
+The rest of the auxiliary rules are `<const>`: either `<INT>` or `<STRING>` or `<CHAR>`, `<match-case>`: `<pattern>` `->` `<term>`, and `<pattern>`: `<SYMBOL>` `(` `<SYMBOL>`, _..._, `<SYMBOL>` `)`.
 
 In Mazeppa, primitive operations employ the same syntax as that of ordinary function calls. To distinguish between the two, we define `<op1>` and `<op2>` to be the following sets of symbols:
- - `<op1>` is one of `~`, `#`, `length`, `string`, `<INT-TY>`.
- - `<op2>` is one of `+`, `-`, `*`, `/`, `%`, `|`, `&`, `^`, `<<`, `>>`, `=`, `!=`, `>`, `>=`, `<`, `<=`, `++`, `get`.
+ - `<op1>` is one of `<int-op1>`, `<string-op1>`.
+ - `<op2>` is one of `<arith-op2>`, `<cmp-op2>`, `<string-op2>`.
 
-Furthermore, `<op2>` has the following subclasses:
- - `<arith-op2>` is one of `+`, `-`, `*`, `/`, `%`, `|`, `&`, `^`, `<<`, `>>`.
- - `<cmp-op2>` is one of `=`, `!=`, `>`, `>=`, `<`, `<=`.
+`<op1>` has the following subclasses:
+ - `<int-op1>` is one of `~`, `#`, `string`, `<INT-TY>`.
+ - `<string-op1>` is one of `length`, `string`.
+
+`<op2>` has the following subclasses:
+  - `<arith-op2>` is one of `+`, `-`, `*`, `/`, `%`, `|`, `&`, `^`, `<<`, `>>`.
+  - `<cmp-op2>` is one of `=`, `!=`, `>`, `>=`, `<`, `<=`.
+  - `<string-op2>` is one of `++`, `get`.
 
 ### Restrictions
 
- - **Per-program:** 1) No symbol can be called with a different number of arguments. 2) No constructor symbol _X_ can be called with _N_ arguments but matched with _M_ arguments, where _N != M_. 3) If some function is defined with _N_ parameters, it must be called with exactly _N_ arguments. 4) No two functions can define the same symbol.
- - **Per-function:** 1) No function can redefine a primitive operator `<op1>` or `<op2>`. 2) A function must define a symbol starting with a lowercase letter. 3) No duplicate symbols can occur among function parameters. 4) Every free variable inside a function body must be bound by a corresponding parameter in the function definition.
- - **Per-term:** 1) The sequence of cases in `match { ... }` must not be empty. 2) No duplicate constructors can occur among case patterns in `match { ... }`. 3) No duplicate symbols can occur among pattern parameters `C(x1, ..., xN)`. 4) No let-binding can bind `<op1>` or `<op2>`. 5) `Panic` must be called with only one argument; `T` and `F` with zero arguments.
+ - **Per-program:**
+   1. No symbol can be called with a different number of arguments.
+   1. No constructor symbol _X_ can be called with _N_ arguments but matched with _M_ arguments, where _N != M_.
+   1. If some function is defined with _N_ parameters, it must be called with exactly _N_ arguments.
+   1. No two functions can define the same symbol.
+ - **Per-function:**
+   1. No function can redefine a primitive operator from either `<op1>` or `<op2>`.
+   1. A function must define a symbol starting with a lowercase letter.
+   1. No duplicate symbols can occur among function parameters.
+   1. Every free variable inside the body must be bound in the parameter list.
+ - **Per-term:**
+   1. The sequence of cases in `match { ... }` must not be empty.
+   1. No duplicate constructors can occur among case patterns in `match { ... }`.
+   1. No duplicate symbols can occur among pattern parameters.
+   1. No let-binding can bind either `<op1>` or `<op2>`.
+   1. `Panic` accepts only one argument; `T` and `F` accept no arguments.
 
 If a program, function, or term conforms to these restrictions, we call it _well-formed_.
 
