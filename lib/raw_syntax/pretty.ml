@@ -51,7 +51,8 @@ and print_pattern (c, c_params) =
 ;;
 
 let print_def (attrs, op, params, body) =
-    assert (List.is_empty attrs);
+    (* TODO: change to [List.is_empty] for newer versions of OCaml. *)
+    assert (List.length attrs = 0);
     [ [ print_symbol op; parens [ print_symbol_list params ] ] |> combine
     ; space
     ; atom ":="
