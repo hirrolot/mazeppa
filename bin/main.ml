@@ -4,7 +4,7 @@ open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 let github_repo = "https://github.com/hirrolot/mazeppa"
 
-let version = "0.7.1"
+let version = "0.7.2"
 
 let tab = "    "
 

@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
+## 0.7.2 - 2025-12-05
+
 ### Fixed
 
  - Remove `List.is_empty` usage because is is only supported on versions 5.1 or higher.
