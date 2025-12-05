@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unreleased
 
+## 0.7.1 - 2025-12-05
+
 ### Changed
 
  - An integer _x_ embeds in integer _y_ of the same type iff _x_ is less than or equal to _y_ (issue https://github.com/hirrolot/mazeppa/issues/35).
